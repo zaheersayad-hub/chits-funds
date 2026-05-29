@@ -1,0 +1,102 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", sans-serif;
+  
+  --color-brand-blue: #2563EB;
+  --color-brand-blue-hover: #1D4ED8;
+  --color-brand-bg: #F5F7FB;
+  --color-brand-card: #FFFFFF;
+  --color-brand-dark: #111827;
+  --color-brand-gray: #6B7280;
+  --color-brand-success: #22C55E;
+  --color-brand-danger: #EF4444;
+  --color-brand-border: #E5E7EB;
+}
+
+/* Custom Micro-animations & utilities */
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pulseBorder {
+  0%, 100% {
+    border-color: rgba(37, 99, 235, 0.4);
+  }
+  50% {
+    border-color: rgba(37, 99, 235, 1);
+  }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+.animate-pulse-border {
+  animation: pulseBorder 2s infinite ease-in-out;
+}
+
+/* Smooth custom scrollbars for mobile lists */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Base styles resets */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: #F5F7FB;
+  font-family: 'Inter', sans-serif;
+  overflow-x: hidden;
+}
+
+/* Ripple/Tap effect emulation */
+.tap-highlight-transparent {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Active states for buttons */
+.active-scale:active {
+  transform: scale(0.97);
+  transition: transform 0.1s ease;
+}
