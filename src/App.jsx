@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard';
 import Groups from './pages/Groups';
 import CreateGroup from './pages/CreateGroup';
 import GroupDetails from './pages/GroupDetails';
+import Auction from './pages/Auction';
 import Payments from './pages/Payments';
 import Profile from './pages/Profile';
 
@@ -21,6 +22,7 @@ export default function App() {
             <Route path="/groups" element={<Groups />} />
             <Route path="/create-group" element={<CreateGroup />} />
             <Route path="/group/:id" element={<GroupDetails />} />
+            <Route path="/group/:id/auction" element={<Auction />} />
             <Route path="/payments" element={<Payments />} />
             <Route path="/profile" element={<Profile />} />
             {/* Fallback to Login */}

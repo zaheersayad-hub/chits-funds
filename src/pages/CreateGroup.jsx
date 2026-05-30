@@ -11,6 +11,8 @@ export default function CreateGroup() {
   const [groupName, setGroupName] = useState('');
   const [monthlyAmount, setMonthlyAmount] = useState('5000');
   const [totalMonths, setTotalMonths] = useState('12');
+  const [commissionPercentage, setCommissionPercentage] = useState('5'); // Default to 5% commission
+  const [commissionModel, setCommissionModel] = useState('discount'); // Default to Discount Based Commission
   const [selectedGradient, setSelectedGradient] = useState('from-blue-600 to-indigo-700');
   const [addedMembers, setAddedMembers] = useState(
     user ? [{ name: user.name, phone: user.phone, upi: user.upi }] : []
@@ -81,6 +83,8 @@ export default function CreateGroup() {
         name: groupName,
         monthlyAmount: Number(monthlyAmount),
         totalMonths: Number(totalMonths),
+        commissionPercentage: Number(commissionPercentage),
+        commissionModel: commissionModel,
         members: addedMembers
       });
       setIsSubmitting(false);
@@ -181,7 +185,9 @@ export default function CreateGroup() {
                       <div className={`w-full h-20 bg-gradient-to-r ${selectedGradient} rounded-xl mt-3.5 flex items-center px-5 shadow-xs text-white`}>
                         <div>
                           <h4 className="font-extrabold text-sm tracking-tight">{groupName || 'My New Savings Group'}</h4>
-                          <p className="text-xs opacity-90 mt-0.5">₹{Number(monthlyAmount).toLocaleString('en-IN')} / month contribution</p>
+                          <p className="text-xs opacity-90 mt-0.5">
+                            ₹{Number(monthlyAmount).toLocaleString('en-IN')} / mo • {commissionPercentage}% ({commissionModel === 'fixed' ? 'Fixed Pool' : 'Discount Based'}) commission
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -230,6 +236,61 @@ export default function CreateGroup() {
                             ₹{amt.toLocaleString('en-IN')}
                           </button>
                         ))}
+                      </div>
+                    </div>
+
+                    {/* Organizer Commission dropdown selection */}
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-brand-dark uppercase tracking-wider block">Organizer Commission Percentage (%)</label>
+                      <select
+                        value={commissionPercentage}
+                        onChange={(e) => setCommissionPercentage(e.target.value)}
+                        className="w-full px-4 py-3 bg-brand-bg border border-brand-border rounded-xl font-semibold text-xs text-brand-dark outline-none focus:border-brand-blue shadow-2xs"
+                      >
+                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(pct => (
+                          <option key={pct} value={pct}>
+                            {pct}% Commission ({commissionModel === 'fixed' ? 'on total pool' : 'on bidding discount'})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Commission Model Selector */}
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-brand-dark uppercase tracking-wider block">Commission Model</label>
+                      <div className="grid grid-cols-2 gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setCommissionModel('fixed')}
+                          className={`p-3 border rounded-xl flex flex-col items-start gap-1 cursor-pointer text-left transition-all ${
+                            commissionModel === 'fixed'
+                              ? 'bg-brand-blue/5 border-brand-blue shadow-2xs'
+                              : 'bg-white border-brand-border hover:bg-slate-50'
+                          }`}
+                        >
+                          <span className={`text-xs font-extrabold ${commissionModel === 'fixed' ? 'text-brand-blue' : 'text-brand-dark'}`}>
+                            Fixed Pool
+                          </span>
+                          <span className="text-[9px] text-brand-gray font-medium leading-normal mt-0.5">
+                            Commission = Total Monthly Pool × Commission % (e.g. ₹5,000 on 5% of ₹1L)
+                          </span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setCommissionModel('discount')}
+                          className={`p-3 border rounded-xl flex flex-col items-start gap-1 cursor-pointer text-left transition-all ${
+                            commissionModel === 'discount'
+                              ? 'bg-brand-blue/5 border-brand-blue shadow-2xs'
+                              : 'bg-white border-brand-border hover:bg-slate-50'
+                          }`}
+                        >
+                          <span className={`text-xs font-extrabold ${commissionModel === 'discount' ? 'text-brand-blue' : 'text-brand-dark'}`}>
+                            Discount Based
+                          </span>
+                          <span className="text-[9px] text-brand-gray font-medium leading-normal mt-0.5">
+                            Commission = Discount × Commission % (e.g. ₹1,500 on 5% of ₹30k discount)
+                          </span>
+                        </button>
                       </div>
                     </div>
 
@@ -373,6 +434,12 @@ export default function CreateGroup() {
                           <span className="text-brand-gray font-medium">Monthly Pot Value</span>
                           <span className="font-black text-brand-blue">
                             ₹{(Number(monthlyAmount) * addedMembers.length).toLocaleString('en-IN')}
+                          </span>
+                        </div>
+                        <div className="py-2.5 flex justify-between flex-wrap gap-2">
+                          <span className="text-brand-gray font-medium">Organizer Commission</span>
+                          <span className="font-bold text-right">
+                            {commissionPercentage}% ({commissionModel === 'fixed' ? 'Fixed Pool' : 'Discount Based'})
                           </span>
                         </div>
                         <div className="py-2.5 flex justify-between">
