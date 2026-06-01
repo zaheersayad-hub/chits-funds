@@ -1,22 +1,30 @@
 import React, { useContext } from 'react';
 import { NavLink } from 'react-router-dom';
-import { FiHome, FiUsers, FiCreditCard, FiUser } from 'react-icons/fi';
+import { FiHome, FiUsers, FiCreditCard, FiClock } from 'react-icons/fi';
 import { ChitContext } from '../context/ChitContext';
 
 export default function BottomNav() {
-  const { groups } = useContext(ChitContext);
+  const { groups, payments } = useContext(ChitContext);
 
-  // Count pending payments for the current user
+  // Count pending payments for the current user (Rajesh Kumar)
   const pendingCount = groups.reduce((count, group) => {
-    const userMember = group.members.find(m => m.name === 'Rajesh Kumar');
-    return count + (userMember?.status === 'Pending' ? 1 : 0);
+    const member = group.members.find(m => m.name === 'Rajesh Kumar');
+    if (!member) return count;
+    
+    const isPaid = payments.some(p => 
+      p.groupId === group.id && 
+      p.memberId === member.id && 
+      Number(p.month) === Number(group.currentMonth)
+    );
+    
+    return count + (isPaid ? 0 : 1);
   }, 0);
 
   const navItems = [
     { to: '/dashboard', label: 'Home', icon: FiHome },
     { to: '/groups', label: 'Groups', icon: FiUsers },
     { to: '/payments', label: 'Payments', icon: FiCreditCard, badge: pendingCount > 0 ? pendingCount : null },
-    { to: '/profile', label: 'Profile', icon: FiUser },
+    { to: '/history', label: 'History', icon: FiClock },
   ];
 
   return (

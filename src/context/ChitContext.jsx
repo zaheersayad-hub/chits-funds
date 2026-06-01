@@ -3,105 +3,85 @@ import React, { createContext, useState, useEffect } from 'react';
 export const ChitContext = createContext();
 
 const MOCK_MEMBERS_TEMPLATES = [
-  { name: 'Rajesh Kumar', phone: '9876543210', upi: 'rajesh@ybl', avatar: 'RK' },
-  { name: 'Anita Sharma', phone: '9123456780', upi: 'anita@oksbi', avatar: 'AS' },
-  { name: 'Sunita Verma', phone: '9234567891', upi: 'sunita@okhdfc', avatar: 'SV' },
-  { name: 'Ram Singh', phone: '9345678902', upi: 'ramsingh@paytm', avatar: 'RS' },
-  { name: 'Amit Patel', phone: '9456789013', upi: 'amitpatel@axl', avatar: 'AP' },
-  { name: 'Vikram Rathore', phone: '9567890124', upi: 'vikram@ybl', avatar: 'VR' },
-  { name: 'Pooja Choudhary', phone: '9678901235', upi: 'pooja@oksbi', avatar: 'PC' },
-  { name: 'Dinesh Yadav', phone: '9789012346', upi: 'dinesh@paytm', avatar: 'DY' },
-  { name: 'Suresh Gupta', phone: '9890123457', upi: 'suresh@okhdfc', avatar: 'SG' },
-  { name: 'Kavita Nair', phone: '9901234568', upi: 'kavita@axl', avatar: 'KN' },
-  { name: 'Harpreet Singh', phone: '9012345679', upi: 'harpreet@ybl', avatar: 'HS' },
-  { name: 'Meena Patel', phone: '9123098765', upi: 'meena@oksbi', avatar: 'MP' },
+  { name: 'Rajesh Kumar', phone: '9876543210', upi: 'rajesh@ybl', avatar: 'RK', address: 'Ward 3, Village Center' },
+  { name: 'Anita Sharma', phone: '9123456780', upi: 'anita@oksbi', avatar: 'AS', address: 'Ganesh Nagar Lane 2' },
+  { name: 'Sunita Verma', phone: '9234567891', upi: 'sunita@okhdfc', avatar: 'SV', address: 'Main Market Road' },
+  { name: 'Ram Singh', phone: '9345678902', upi: 'ramsingh@paytm', avatar: 'RS', address: 'Farmers Colony' },
+  { name: 'Amit Patel', phone: '9456789013', upi: 'amitpatel@axl', avatar: 'AP', address: 'Near Old Temple' },
+  { name: 'Vikram Rathore', phone: '9567890124', upi: 'vikram@ybl', avatar: 'VR', address: 'Rathore Farmhouse' },
+  { name: 'Pooja Choudhary', phone: '9678901235', upi: 'pooja@oksbi', avatar: 'PC', address: 'Panchayat Road' },
+  { name: 'Dinesh Yadav', phone: '9789012346', upi: 'dinesh@paytm', avatar: 'DY', address: 'Yadav Vihar' },
+  { name: 'Suresh Gupta', phone: '9890123457', upi: 'suresh@okhdfc', avatar: 'SG', address: 'Gupta General Store' },
 ];
 
-// Initial Prepopulated Groups with dynamic auction and commission states
 const INITIAL_GROUPS = [
   {
     id: 'g1',
-    name: 'Kudumbashree Monthly Chit',
-    monthlyAmount: 5000,
-    totalMonths: 12,
-    currentMonth: 4,
-    commissionPercentage: 5, // 5% organizer commission
-    commissionModel: 'discount',
-    payableAmount: 4667.5, // Current month's payable amount (₹5,000 - ₹332.5 dividend from month 3)
+    name: 'Village Friends Chit',
+    monthlyAmount: 10000,
+    totalMembers: 4,
+    currentMonth: 3,
+    startDate: '2026-03-01',
     gradient: 'from-blue-600 to-indigo-700',
     members: [
-      { id: 'm1', name: 'Rajesh Kumar', phone: '9876543210', upi: 'rajesh@ybl', avatar: 'RK', status: 'Paid', paymentDate: '2026-05-25', paidAmount: 4667.5 },
-      { id: 'm2', name: 'Anita Sharma', phone: '9123456780', upi: 'anita@oksbi', avatar: 'AS', status: 'Paid', paymentDate: '2026-05-24', paidAmount: 4667.5 },
-      { id: 'm3', name: 'Sunita Verma', phone: '9234567891', upi: 'sunita@okhdfc', avatar: 'SV', status: 'Pending' },
-      { id: 'm4', name: 'Ram Singh', phone: '9345678902', upi: 'ramsingh@paytm', avatar: 'RS', status: 'Pending' },
-      { id: 'm5', name: 'Amit Patel', phone: '9456789013', upi: 'amitpatel@axl', avatar: 'AP', status: 'Paid', paymentDate: '2026-05-28', paidAmount: 4667.5 },
-      { id: 'm6', name: 'Vikram Rathore', phone: '9567890124', upi: 'vikram@ybl', avatar: 'VR', status: 'Pending' },
-      { id: 'm7', name: 'Pooja Choudhary', phone: '9678901235', upi: 'pooja@oksbi', avatar: 'PC', status: 'Paid', paymentDate: '2026-05-27', paidAmount: 4667.5 },
-      { id: 'm8', name: 'Dinesh Yadav', phone: '9789012346', upi: 'dinesh@paytm', avatar: 'DY', status: 'Pending' },
-      { id: 'm9', name: 'Suresh Gupta', phone: '9890123457', upi: 'suresh@okhdfc', avatar: 'SG', status: 'Paid', paymentDate: '2026-05-26', paidAmount: 4667.5 },
-      { id: 'm10', name: 'Kavita Nair', phone: '9901234568', upi: 'kavita@axl', avatar: 'KN', status: 'Pending' },
-    ],
-    auctionHistory: [
-      { month: 1, winnerName: 'Anita Sharma', bidAmount: 48000, discount: 2000, commission: 100, dividendPool: 1900, dividendPerMember: 190, payableAmount: 4810, date: '2026-02-15' },
-      { month: 2, winnerName: 'Sunita Verma', bidAmount: 47200, discount: 2800, commission: 140, dividendPool: 2660, dividendPerMember: 266, payableAmount: 4734, date: '2026-03-15' },
-      { month: 3, winnerName: 'Meena Patel', bidAmount: 46500, discount: 3500, commission: 175, dividendPool: 3325, dividendPerMember: 332.5, payableAmount: 4667.5, date: '2026-04-15' },
-    ],
+      { id: 'm1', name: 'Rajesh Kumar', phone: '9876543210', upi: 'rajesh@ybl', avatar: 'RK', address: 'Ward 3, Village Center' },
+      { id: 'm2', name: 'Anita Sharma', phone: '9123456780', upi: 'anita@oksbi', avatar: 'AS', address: 'Ganesh Nagar Lane 2' },
+      { id: 'm3', name: 'Sunita Verma', phone: '9234567891', upi: 'sunita@okhdfc', avatar: 'SV', address: 'Main Market Road' },
+      { id: 'm4', name: 'Ram Singh', phone: '9345678902', upi: 'ramsingh@paytm', avatar: 'RS', address: 'Farmers Colony' }
+    ]
   },
   {
     id: 'g2',
-    name: 'Farmers Crop Growth Fund',
-    monthlyAmount: 10000,
-    totalMonths: 10,
+    name: 'Farmers Savings Union',
+    monthlyAmount: 5000,
+    totalMembers: 6,
     currentMonth: 2,
-    commissionPercentage: 3, // 3% organizer commission
-    commissionModel: 'discount',
-    payableAmount: 9515, // (₹10,000 - ₹485 dividend from Month 1)
+    startDate: '2026-05-01',
     gradient: 'from-emerald-600 to-teal-700',
     members: [
-      { id: 'm1', name: 'Rajesh Kumar', phone: '9876543210', upi: 'rajesh@ybl', avatar: 'RK', status: 'Pending' },
-      { id: 'm4', name: 'Ram Singh', phone: '9345678902', upi: 'ramsingh@paytm', avatar: 'RS', status: 'Paid', paymentDate: '2026-05-20', paidAmount: 9515 },
-      { id: 'm5', name: 'Amit Patel', phone: '9456789013', upi: 'amitpatel@axl', avatar: 'AP', status: 'Paid', paymentDate: '2026-05-21', paidAmount: 9515 },
-      { id: 'm6', name: 'Vikram Rathore', phone: '9567890124', upi: 'vikram@ybl', avatar: 'VR', status: 'Paid', paymentDate: '2026-05-23', paidAmount: 9515 },
-      { id: 'm8', name: 'Dinesh Yadav', phone: '9789012346', upi: 'dinesh@paytm', avatar: 'DY', status: 'Pending' },
-      { id: 'm9', name: 'Suresh Gupta', phone: '9890123457', upi: 'suresh@okhdfc', avatar: 'SG', status: 'Pending' },
-      { id: 'm11', name: 'Harpreet Singh', phone: '9012345679', upi: 'harpreet@ybl', avatar: 'HS', status: 'Paid', paymentDate: '2026-05-22', paidAmount: 9515 },
-      { id: 'm12', name: 'Meena Patel', phone: '9123098765', upi: 'meena@oksbi', avatar: 'MP', status: 'Paid', paymentDate: '2026-05-25', paidAmount: 9515 },
-    ],
-    auctionHistory: [
-      { month: 1, winnerName: 'Ram Singh', bidAmount: 76000, discount: 4000, commission: 120, dividendPool: 3880, dividendPerMember: 485, payableAmount: 9515, date: '2026-04-10' },
-    ],
-  },
-  {
-    id: 'g3',
-    name: 'Shopkeepers Merchant Union',
-    monthlyAmount: 20000,
-    totalMonths: 15,
-    currentMonth: 1,
-    commissionPercentage: 5,
-    commissionModel: 'fixed',
-    payableAmount: 20000, // Month 1, no dividend discount yet
-    gradient: 'from-orange-500 to-amber-600',
-    members: [
-      { id: 'm1', name: 'Rajesh Kumar', phone: '9876543210', upi: 'rajesh@ybl', avatar: 'RK', status: 'Pending' },
-      { id: 'm2', name: 'Anita Sharma', phone: '9123456780', upi: 'anita@oksbi', avatar: 'AS', status: 'Pending' },
-      { id: 'm5', name: 'Amit Patel', phone: '9456789013', upi: 'amitpatel@axl', avatar: 'AP', status: 'Pending' },
-      { id: 'm6', name: 'Vikram Rathore', phone: '9567890124', upi: 'vikram@ybl', avatar: 'VR', status: 'Pending' },
-      { id: 'm7', name: 'Pooja Choudhary', phone: '9678901235', upi: 'pooja@oksbi', avatar: 'PC', status: 'Pending' },
-      { id: 'm8', name: 'Dinesh Yadav', phone: '9789012346', upi: 'dinesh@paytm', avatar: 'DY', status: 'Pending' },
-      { id: 'm10', name: 'Kavita Nair', phone: '9901234568', upi: 'kavita@axl', avatar: 'KN', status: 'Pending' },
-      { id: 'm11', name: 'Harpreet Singh', phone: '9012345679', upi: 'harpreet@ybl', avatar: 'HS', status: 'Pending' },
-    ],
-    auctionHistory: [],
+      { id: 'm1', name: 'Rajesh Kumar', phone: '9876543210', upi: 'rajesh@ybl', avatar: 'RK', address: 'Ward 3, Village Center' },
+      { id: 'm5', name: 'Amit Patel', phone: '9456789013', upi: 'amitpatel@axl', avatar: 'AP', address: 'Near Old Temple' },
+      { id: 'm6', name: 'Vikram Rathore', phone: '9567890124', upi: 'vikram@ybl', avatar: 'VR', address: 'Rathore Farmhouse' },
+      { id: 'm7', name: 'Pooja Choudhary', phone: '9678901235', upi: 'pooja@oksbi', avatar: 'PC', address: 'Panchayat Road' },
+      { id: 'm8', name: 'Dinesh Yadav', phone: '9789012346', upi: 'dinesh@paytm', avatar: 'DY', address: 'Yadav Vihar' },
+      { id: 'm9', name: 'Suresh Gupta', phone: '9890123457', upi: 'suresh@okhdfc', avatar: 'SG', address: 'Gupta General Store' }
+    ]
   }
 ];
 
-// Initial Transactions log
-const INITIAL_TRANSACTIONS = [
-  { id: 't1', groupName: 'Kudumbashree Monthly Chit', memberName: 'Rajesh Kumar', amount: 4667.5, date: '2026-05-25', status: 'Success', upi: 'rajesh@ybl' },
-  { id: 't2', groupName: 'Kudumbashree Monthly Chit', memberName: 'Anita Sharma', amount: 4667.5, date: '2026-05-24', status: 'Success', upi: 'anita@oksbi' },
-  { id: 't3', groupName: 'Farmers Crop Growth Fund', memberName: 'Ram Singh', amount: 9515, date: '2026-05-20', status: 'Success', upi: 'ramsingh@paytm' },
-  { id: 't4', groupName: 'Farmers Crop Growth Fund', memberName: 'Amit Patel', amount: 9515, date: '2026-05-21', status: 'Success', upi: 'amitpatel@axl' },
-  { id: 't5', groupName: 'Kudumbashree Monthly Chit', memberName: 'Pooja Choudhary', amount: 4667.5, date: '2026-05-27', status: 'Success', upi: 'pooja@oksbi' }
+const INITIAL_PAYMENTS = [
+  // Group 1 - Month 1
+  { id: 'p1', groupId: 'g1', groupName: 'Village Friends Chit', memberId: 'm1', memberName: 'Rajesh Kumar', amountPaid: 10000, paymentDate: '2026-03-05', paymentMode: 'UPI', receiptId: 'CT-10101', month: 1 },
+  { id: 'p2', groupId: 'g1', groupName: 'Village Friends Chit', memberId: 'm2', memberName: 'Anita Sharma', amountPaid: 10000, paymentDate: '2026-03-06', paymentMode: 'Cash', receiptId: 'CT-10102', month: 1 },
+  { id: 'p3', groupId: 'g1', groupName: 'Village Friends Chit', memberId: 'm3', memberName: 'Sunita Verma', amountPaid: 10000, paymentDate: '2026-03-07', paymentMode: 'Bank Transfer', receiptId: 'CT-10103', month: 1 },
+  { id: 'p4', groupId: 'g1', groupName: 'Village Friends Chit', memberId: 'm4', memberName: 'Ram Singh', amountPaid: 10000, paymentDate: '2026-03-08', paymentMode: 'UPI', receiptId: 'CT-10104', month: 1 },
+  // Group 1 - Month 2
+  { id: 'p5', groupId: 'g1', groupName: 'Village Friends Chit', memberId: 'm1', memberName: 'Rajesh Kumar', amountPaid: 10000, paymentDate: '2026-04-05', paymentMode: 'UPI', receiptId: 'CT-20101', month: 2 },
+  { id: 'p6', groupId: 'g1', groupName: 'Village Friends Chit', memberId: 'm2', memberName: 'Anita Sharma', amountPaid: 10000, paymentDate: '2026-04-06', paymentMode: 'Cash', receiptId: 'CT-20102', month: 2 },
+  { id: 'p7', groupId: 'g1', groupName: 'Village Friends Chit', memberId: 'm3', memberName: 'Sunita Verma', amountPaid: 10000, paymentDate: '2026-04-07', paymentMode: 'Bank Transfer', receiptId: 'CT-20103', month: 2 },
+  { id: 'p8', groupId: 'g1', groupName: 'Village Friends Chit', memberId: 'm4', memberName: 'Ram Singh', amountPaid: 10000, paymentDate: '2026-04-08', paymentMode: 'UPI', receiptId: 'CT-20104', month: 2 },
+  // Group 1 - Month 3 (Current)
+  { id: 'p9', groupId: 'g1', groupName: 'Village Friends Chit', memberId: 'm1', memberName: 'Rajesh Kumar', amountPaid: 10000, paymentDate: '2026-05-05', paymentMode: 'UPI', receiptId: 'CT-30101', month: 3 },
+  { id: 'p10', groupId: 'g1', groupName: 'Village Friends Chit', memberId: 'm2', memberName: 'Anita Sharma', amountPaid: 10000, paymentDate: '2026-05-06', paymentMode: 'Cash', receiptId: 'CT-30102', month: 3 },
+
+  // Group 2 - Month 1
+  { id: 'p11', groupId: 'g2', groupName: 'Farmers Savings Union', memberId: 'm1', memberName: 'Rajesh Kumar', amountPaid: 5000, paymentDate: '2026-05-05', paymentMode: 'UPI', receiptId: 'CT-11101', month: 1 },
+  { id: 'p12', groupId: 'g2', groupName: 'Farmers Savings Union', memberId: 'm5', memberName: 'Amit Patel', amountPaid: 5000, paymentDate: '2026-05-06', paymentMode: 'UPI', receiptId: 'CT-11102', month: 1 },
+  { id: 'p13', groupId: 'g2', groupName: 'Farmers Savings Union', memberId: 'm6', memberName: 'Vikram Rathore', amountPaid: 5000, paymentDate: '2026-05-06', paymentMode: 'Cash', receiptId: 'CT-11103', month: 1 },
+  { id: 'p14', groupId: 'g2', groupName: 'Farmers Savings Union', memberId: 'm7', memberName: 'Pooja Choudhary', amountPaid: 5000, paymentDate: '2026-05-07', paymentMode: 'Cash', receiptId: 'CT-11104', month: 1 },
+  { id: 'p15', groupId: 'g2', groupName: 'Farmers Savings Union', memberId: 'm8', memberName: 'Dinesh Yadav', amountPaid: 5000, paymentDate: '2026-05-08', paymentMode: 'Bank Transfer', receiptId: 'CT-11105', month: 1 },
+  { id: 'p16', groupId: 'g2', groupName: 'Farmers Savings Union', memberId: 'm9', memberName: 'Suresh Gupta', amountPaid: 5000, paymentDate: '2026-05-09', paymentMode: 'Cash', receiptId: 'CT-11106', month: 1 },
+  // Group 2 - Month 2 (Current)
+  { id: 'p17', groupId: 'g2', groupName: 'Farmers Savings Union', memberId: 'm1', memberName: 'Rajesh Kumar', amountPaid: 5000, paymentDate: '2026-06-01', paymentMode: 'UPI', receiptId: 'CT-22101', month: 2 },
+  { id: 'p18', groupId: 'g2', groupName: 'Farmers Savings Union', memberId: 'm5', memberName: 'Amit Patel', amountPaid: 5000, paymentDate: '2026-06-01', paymentMode: 'UPI', receiptId: 'CT-22102', month: 2 },
+];
+
+const INITIAL_WINNERS = [
+  // Group 1
+  { id: 'w1', groupId: 'g1', groupName: 'Village Friends Chit', month: 1, winnerName: 'Rajesh Kumar', amountReleased: 40000, releaseDate: '2026-03-10' },
+  { id: 'w2', groupId: 'g1', groupName: 'Village Friends Chit', month: 2, winnerName: 'Anita Sharma', amountReleased: 40000, releaseDate: '2026-04-10' },
+  // Group 2
+  { id: 'w3', groupId: 'g2', groupName: 'Farmers Savings Union', month: 1, winnerName: 'Amit Patel', amountReleased: 30000, releaseDate: '2026-05-12' },
 ];
 
 export const ChitProvider = ({ children }) => {
@@ -111,67 +91,18 @@ export const ChitProvider = ({ children }) => {
   });
 
   const [groups, setGroups] = useState(() => {
-    try {
-      const savedGroups = localStorage.getItem('chittrack_groups');
-      if (savedGroups) {
-        const parsed = JSON.parse(savedGroups);
-        return parsed.map(g => {
-          const mCount = g.members ? g.members.length : 10;
-          const commPct = g.commissionPercentage || 5;
-          const commModel = g.commissionModel || 'discount';
-          const hist = g.auctionHistory || g.winnerHistory || [];
-          
-          // Migrate old history entries to ensure they contain all calculations
-          const migratedHistory = hist.map(h => {
-            const bid = h.bidAmount || 0;
-            const pool = g.monthlyAmount * mCount;
-            const discount = h.discount !== undefined ? h.discount : Math.max(0, pool - bid);
-            const commission = h.commission !== undefined ? h.commission : (commModel === 'fixed' ? pool * (commPct / 100) : discount * (commPct / 100));
-            const dividendPool = h.dividendPool !== undefined ? h.dividendPool : Math.max(0, discount - commission);
-            const dividendPerMember = h.dividendPerMember !== undefined ? h.dividendPerMember : dividendPool / mCount;
-            const payable = h.payableAmount !== undefined ? h.payableAmount : g.monthlyAmount - dividendPerMember;
-            
-            return {
-              month: h.month,
-              winnerName: h.winnerName || h.name || 'Unknown Winner',
-              bidAmount: bid,
-              discount,
-              commission,
-              dividendPool,
-              dividendPerMember,
-              payableAmount: payable,
-              date: h.date || new Date().toISOString().split('T')[0]
-            };
-          });
-
-          return {
-            ...g,
-            commissionPercentage: commPct,
-            commissionModel: commModel,
-            payableAmount: g.payableAmount !== undefined ? g.payableAmount : g.monthlyAmount,
-            gradient: g.gradient || 'from-blue-600 to-indigo-700',
-            auctionHistory: migratedHistory,
-            members: g.members ? g.members.map(m => ({
-              ...m,
-              paidAmount: m.paidAmount || 0,
-              status: m.status || 'Pending'
-            })) : []
-          };
-        });
-      }
-      return INITIAL_GROUPS;
-    } catch (e) {
-      return INITIAL_GROUPS;
-    }
+    const savedGroups = localStorage.getItem('chittrack_groups');
+    return savedGroups ? JSON.parse(savedGroups) : INITIAL_GROUPS;
   });
 
-  const [transactions, setTransactions] = useState(() => {
-    try {
-      const savedTxns = localStorage.getItem('chittrack_transactions');
-      return savedTxns ? JSON.parse(savedTxns) : INITIAL_TRANSACTIONS;
-    } catch (e) {
-      return INITIAL_TRANSACTIONS;
-    }
+  const [payments, setPayments] = useState(() => {
+    const savedPayments = localStorage.getItem('chittrack_payments');
+    return savedPayments ? JSON.parse(savedPayments) : INITIAL_PAYMENTS;
+  });
+
+  const [winners, setWinners] = useState(() => {
+    const savedWinners = localStorage.getItem('chittrack_winners');
+    return savedWinners ? JSON.parse(savedWinners) : INITIAL_WINNERS;
   });
 
   useEffect(() => {
@@ -187,16 +118,20 @@ export const ChitProvider = ({ children }) => {
   }, [groups]);
 
   useEffect(() => {
-    localStorage.setItem('chittrack_transactions', JSON.stringify(transactions));
-  }, [transactions]);
+    localStorage.setItem('chittrack_payments', JSON.stringify(payments));
+  }, [payments]);
 
-  // Auth Operations
+  useEffect(() => {
+    localStorage.setItem('chittrack_winners', JSON.stringify(winners));
+  }, [winners]);
+
   const login = (phone) => {
     const loggedInUser = {
       name: 'Rajesh Kumar',
       phone: phone || '9876543210',
       upi: 'rajesh@ybl',
-      avatar: 'RK'
+      avatar: 'RK',
+      address: 'Ward 3, Village Center'
     };
     setUser(loggedInUser);
   };
@@ -205,8 +140,7 @@ export const ChitProvider = ({ children }) => {
     setUser(null);
   };
 
-  // Group Operations
-  const createGroup = (newGroupData) => {
+  const createGroup = (groupData) => {
     const gradients = [
       'from-blue-600 to-indigo-700',
       'from-emerald-600 to-teal-700',
@@ -215,137 +149,98 @@ export const ChitProvider = ({ children }) => {
       'from-purple-600 to-violet-700'
     ];
     const randomGradient = gradients[Math.floor(Math.random() * gradients.length)];
-    
-    const groupMembers = newGroupData.members.map((m, idx) => ({
+
+    const members = groupData.members.map((m, idx) => ({
       id: `m_${Date.now()}_${idx}`,
       name: m.name,
       phone: m.phone || '9999999999',
-      upi: m.upi || `${m.name.toLowerCase().replace(/\s/g, '')}@ybl`,
+      address: m.address || 'Local area',
       avatar: m.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2),
-      status: 'Pending',
-      paymentDate: null,
-      paidAmount: 0
     }));
 
-    if (!groupMembers.some(m => m.name === user?.name)) {
-      groupMembers.unshift({
+    // Auto add organizer Rajesh Kumar as the first member if not already added
+    if (!members.some(m => m.name === 'Rajesh Kumar')) {
+      members.unshift({
         id: 'm1',
-        name: user?.name || 'Rajesh Kumar',
-        phone: user?.phone || '9876543210',
-        upi: user?.upi || 'rajesh@ybl',
+        name: 'Rajesh Kumar',
+        phone: '9876543210',
+        upi: 'rajesh@ybl',
         avatar: 'RK',
-        status: 'Pending',
-        paymentDate: null,
-        paidAmount: 0
+        address: 'Ward 3, Village Center'
       });
     }
 
     const newGroup = {
       id: `g_${Date.now()}`,
-      name: newGroupData.name,
-      monthlyAmount: Number(newGroupData.monthlyAmount),
-      totalMonths: Number(newGroupData.totalMonths),
+      name: groupData.name,
+      monthlyAmount: Number(groupData.monthlyAmount),
+      totalMembers: members.length,
       currentMonth: 1,
-      commissionPercentage: Number(newGroupData.commissionPercentage || 5),
-      commissionModel: newGroupData.commissionModel || 'discount',
-      payableAmount: Number(newGroupData.monthlyAmount), // Month 1 base payable
+      startDate: groupData.startDate || new Date().toISOString().split('T')[0],
       gradient: randomGradient,
-      members: groupMembers,
-      auctionHistory: [],
+      image: groupData.image || null,
+      members: members
     };
 
     setGroups(prev => [newGroup, ...prev]);
     return newGroup.id;
   };
 
-  // Settle Month N Bidding Auction
-  const submitAuctionBid = (groupId, winnerName, bidAmount) => {
-    setGroups(prevGroups => {
-      return prevGroups.map(group => {
-        if (group.id !== groupId) return group;
+  const recordPayment = (groupId, memberId, month, amountPaid, paymentMode, paymentDate, transactionRef) => {
+    const group = groups.find(g => g.id === groupId);
+    const member = group?.members.find(m => m.id === memberId);
+    
+    if (!group || !member) return null;
 
-        const totalMembers = group.members.length;
-        const monthlyAmount = group.monthlyAmount;
-        const monthlyPool = monthlyAmount * totalMembers;
-        
-        const winningBidVal = Number(bidAmount);
-        const discountVal = monthlyPool - winningBidVal;
-        
-        const commModel = group.commissionModel || 'discount';
-        const commissionVal = commModel === 'fixed'
-          ? monthlyPool * (group.commissionPercentage / 100)
-          : discountVal * (group.commissionPercentage / 100);
+    const receiptNum = Math.floor(10000 + Math.random() * 90000);
+    const newPayment = {
+      id: `p_${Date.now()}`,
+      groupId,
+      groupName: group.name,
+      memberId,
+      memberName: member.name,
+      amountPaid: Number(amountPaid),
+      paymentDate: paymentDate || new Date().toISOString().split('T')[0],
+      paymentMode: paymentMode || 'UPI',
+      receiptId: `CT-${receiptNum}`,
+      month: Number(month),
+      transactionRef: transactionRef || ''
+    };
 
-        const dividendPoolVal = Math.max(0, discountVal - commissionVal);
-        const dividendPerMemberVal = dividendPoolVal / totalMembers;
-        const nextMonthPayableVal = Math.max(0, monthlyAmount - dividendPerMemberVal);
-
-        // Create new auction history entry
-        const newAuctionRecord = {
-          month: group.currentMonth,
-          winnerName: winnerName,
-          bidAmount: winningBidVal,
-          discount: discountVal,
-          commission: commissionVal,
-          dividendPool: dividendPoolVal,
-          dividendPerMember: dividendPerMemberVal,
-          payableAmount: nextMonthPayableVal,
-          date: new Date().toISOString().split('T')[0]
-        };
-
-        // Reset members payment status for next month
-        const updatedMembers = group.members.map(member => ({
-          ...member,
-          status: 'Pending',
-          paymentDate: null,
-          paidAmount: 0
-        }));
-
-        return {
-          ...group,
-          currentMonth: group.currentMonth + 1,
-          payableAmount: nextMonthPayableVal,
-          members: updatedMembers,
-          auctionHistory: [...(group.auctionHistory || []), newAuctionRecord]
-        };
-      });
-    });
+    setPayments(prev => [newPayment, ...prev]);
+    return newPayment;
   };
 
-  // Payment Operations
-  const markPayment = (groupId, memberId, notes = '') => {
-    setGroups(prevGroups => {
-      return prevGroups.map(group => {
-        if (group.id !== groupId) return group;
-        
-        const updatedMembers = group.members.map(member => {
-          if (member.id !== memberId) return member;
-          
-          const newTx = {
-            id: `t_${Date.now()}`,
-            groupName: group.name,
-            memberName: member.name,
-            amount: group.payableAmount, // Paid amount matches current cycle payable
-            date: new Date().toISOString().split('T')[0],
-            status: 'Success',
-            upi: member.upi
-          };
-          setTransactions(prevTx => [newTx, ...prevTx]);
+  const declareWinner = (groupId, month, winnerName, amountReleased, releaseDate) => {
+    const group = groups.find(g => g.id === groupId);
+    if (!group) return null;
 
+    const newWinner = {
+      id: `w_${Date.now()}`,
+      groupId,
+      groupName: group.name,
+      month: Number(month),
+      winnerName,
+      amountReleased: Number(amountReleased),
+      releaseDate: releaseDate || new Date().toISOString().split('T')[0]
+    };
+
+    setWinners(prev => [newWinner, ...prev]);
+
+    // Advance current month in group
+    setGroups(prevGroups => 
+      prevGroups.map(g => {
+        if (g.id === groupId) {
           return {
-            ...member,
-            status: 'Paid',
-            paymentDate: newTx.date,
-            paidAmount: group.payableAmount
+            ...g,
+            currentMonth: g.currentMonth + 1
           };
-        });
+        }
+        return g;
+      })
+    );
 
-        return {
-          ...group,
-          members: updatedMembers
-        };
-      });
-    });
+    return newWinner;
   };
 
   const getMockMembersTemplates = () => MOCK_MEMBERS_TEMPLATES;
@@ -354,12 +249,13 @@ export const ChitProvider = ({ children }) => {
     <ChitContext.Provider value={{
       user,
       groups,
-      transactions,
+      payments,
+      winners,
       login,
       logout,
       createGroup,
-      submitAuctionBid,
-      markPayment,
+      recordPayment,
+      declareWinner,
       getMockMembersTemplates
     }}>
       {children}
