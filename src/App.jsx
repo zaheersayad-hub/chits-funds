@@ -9,7 +9,7 @@ import CreateGroup from './pages/CreateGroup';
 import GroupDetails from './pages/GroupDetails';
 import Payments from './pages/Payments';
 import History from './pages/History';
-
+import Profile from './pages/Profile';
 
 export default function App() {
   return (
@@ -24,6 +24,7 @@ export default function App() {
             <Route path="/group/:id" element={<GroupDetails />} />
             <Route path="/payments" element={<Payments />} />
             <Route path="/history" element={<History />} />
+            <Route path="/profile" element={<Profile />} />
             {/* Fallback to Login */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

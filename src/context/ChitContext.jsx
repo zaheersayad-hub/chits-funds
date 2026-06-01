@@ -248,6 +248,7 @@ export const ChitProvider = ({ children }) => {
   return (
     <ChitContext.Provider value={{
       user,
+      setUser,
       groups,
       payments,
       winners,

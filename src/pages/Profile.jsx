@@ -1,39 +1,108 @@
 import React, { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChitContext } from '../context/ChitContext';
-import { FiArrowLeft, FiLogOut, FiGlobe, FiShield, FiUser, FiInfo, FiChevronRight, FiCreditCard } from 'react-icons/fi';
+import { 
+  FiArrowLeft, FiLogOut, FiGlobe, FiShield, FiUser, 
+  FiInfo, FiChevronRight, FiCreditCard, FiLock, FiBell, 
+  FiMessageCircle, FiCamera, FiCheckCircle 
+} from 'react-icons/fi';
 
 export default function Profile() {
-  const { user, logout } = useContext(ChitContext);
+  const { user, setUser, logout } = useContext(ChitContext);
   const navigate = useNavigate();
-  const [lang, setLang] = useState('English');
-  const [showLanguageModal, setShowLanguageModal] = useState(false);
 
+  // Redirect if not logged in
   if (!user) {
     navigate('/');
     return null;
   }
+
+  // Personal Info States
+  const [name, setName] = useState(user.name || 'Rajesh Kumar');
+  const [phone, setPhone] = useState(user.phone || '9876543210');
+  const [email, setEmail] = useState(user.email || 'rajesh.kumar@gmail.com');
+  const [organizerName, setOrganizerName] = useState(user.organizerName || 'Village Friends Savings Club');
+  const [avatarBg, setAvatarBg] = useState(user.avatarBg || 'bg-brand-blue');
+
+  // Change Password States
+  const [oldPassword, setOldPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordStatus, setPasswordStatus] = useState('');
+
+  // Notification States
+  const [emailAlerts, setEmailAlerts] = useState(true);
+  const [smsAlerts, setSmsAlerts] = useState(true);
+  const [pushNotifications, setPushNotifications] = useState(false);
+
+  // WhatsApp Integration States
+  const [autoReceipts, setAutoReceipts] = useState(true);
+  const [paymentReminders, setPaymentReminders] = useState(true);
+
+  // App Preferences
+  const [language, setLanguage] = useState('English');
+  const [theme, setTheme] = useState('Light');
+  const [currency, setCurrency] = useState('₹ (INR)');
+
+  const [profileSaved, setProfileSaved] = useState(false);
 
   const handleLogoutClick = () => {
     logout();
     navigate('/');
   };
 
-  const languages = ['English', 'हिंदी (Hindi)', 'മലയാളം (Malayalam)', 'தமிழ் (Tamil)', 'తెలుగు (Telugu)'];
-
-  const handleSelectLanguage = (selected) => {
-    setLang(selected.split(' ')[0]);
-    setShowLanguageModal(false);
+  const handleSaveProfile = (e) => {
+    e.preventDefault();
+    if (!name.trim()) {
+      alert('Name is required');
+      return;
+    }
+    // Update user in Context
+    const updatedUser = {
+      ...user,
+      name,
+      phone,
+      email,
+      organizerName,
+      avatar: name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2),
+      avatarBg
+    };
+    setUser(updatedUser);
+    setProfileSaved(true);
+    setTimeout(() => setProfileSaved(false), 3000);
   };
 
+  const handleUpdatePassword = (e) => {
+    e.preventDefault();
+    if (!oldPassword || !newPassword || !confirmPassword) {
+      setPasswordStatus('error:Please fill all password fields');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordStatus('error:New passwords do not match');
+      return;
+    }
+    setPasswordStatus('success:Password updated successfully!');
+    setOldPassword('');
+    setNewPassword('');
+    setConfirmPassword('');
+    setTimeout(() => setPasswordStatus(''), 4000);
+  };
+
+  const avatarColors = [
+    { name: 'Classic Blue', class: 'bg-brand-blue' },
+    { name: 'Emerald Teal', class: 'bg-emerald-650 bg-teal-700' },
+    { name: 'Vibrant Orange', class: 'bg-orange-500' },
+    { name: 'Rose Red', class: 'bg-rose-600' },
+    { name: 'Royal Purple', class: 'bg-purple-600' }
+  ];
+
   return (
-    <div className="flex-1 bg-brand-bg relative overflow-x-hidden">
-      
-      {/* Outer container */}
-      <div className="max-w-7xl mx-auto px-4 md:px-8 py-6 pb-24 md:py-8 space-y-6">
+    <div className="flex-grow bg-brand-bg relative overflow-x-hidden">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-6 pb-24 space-y-6">
         
-        {/* Top Header */}
-        <div className="flex items-center justify-between pb-2 border-b border-brand-border/40 animate-fade-in">
+        {/* Header */}
+        <div className="flex items-center justify-between pb-2 border-b border-brand-border/40">
           <div className="flex items-center gap-3">
             <button 
               onClick={() => navigate('/dashboard')}
@@ -42,8 +111,8 @@ export default function Profile() {
               <FiArrowLeft className="w-5 h-5" />
             </button>
             <div>
-              <h2 className="text-xl font-extrabold text-brand-dark tracking-tight">Account Profile</h2>
-              <p className="text-[10px] text-brand-gray font-bold tracking-wider uppercase mt-0.5">Preferences & Security</p>
+              <h2 className="text-xl font-extrabold text-brand-dark tracking-tight">Profile Settings</h2>
+              <p className="text-xs text-brand-gray font-bold tracking-wider uppercase mt-0.5">Manage organizer profile & preferences</p>
             </div>
           </div>
         </div>
@@ -51,114 +120,341 @@ export default function Profile() {
         {/* 2-Column Responsive Grid Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
           
-          {/* LEFT PANEL: User Identity Avatar & Savings score dial (Spans 1 col) */}
+          {/* LEFT COLUMN: Profile Pic & Password Change */}
           <div className="lg:col-span-1 space-y-6">
             
-            {/* Identity Card */}
-            <div className="bg-white rounded-2xl p-6 border border-brand-border shadow-xs text-center flex flex-col items-center animate-scale-in">
-              <div className="w-18 h-18 rounded-full bg-brand-blue text-white font-extrabold text-xl flex items-center justify-center shadow-md border-4 border-slate-50 mb-3 animate-pulse-border">
-                {user.avatar}
+            {/* Profile Photo Card */}
+            <div className="bg-white rounded-2xl p-6 border border-brand-border shadow-2xs text-center flex flex-col items-center animate-scale-in">
+              <div className="relative group">
+                <div className={`w-24 h-24 rounded-full ${avatarBg} text-white font-black text-2xl flex items-center justify-center shadow-md border-4 border-slate-50 transition-all`}>
+                  {user.avatar || 'RK'}
+                </div>
+                <div className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-brand-blue text-white flex items-center justify-center border-2 border-white shadow-sm cursor-pointer active-scale" title="Change Avatar Theme">
+                  <FiCamera className="w-4 h-4" />
+                </div>
               </div>
               
-              <h3 className="text-base font-black text-brand-dark">{user.name}</h3>
-              <p className="text-xs font-semibold text-brand-gray mt-0.5">+91 {user.phone}</p>
+              <h3 className="text-base font-black text-brand-dark mt-4">{name}</h3>
+              <p className="text-xs font-bold text-brand-gray mt-0.5">+91 {phone}</p>
               
-              <span className="text-[10px] bg-slate-50 text-brand-gray font-bold px-3.5 py-1.5 rounded-full border border-brand-border mt-3 shadow-2xs">
-                UPI ID: {user.upi}
-              </span>
+              <div className="mt-4 pt-4 border-t border-brand-border/60 w-full">
+                <span className="text-[10px] font-black text-brand-gray uppercase tracking-wider block mb-2 text-left">Choose Avatar Color</span>
+                <div className="flex justify-center gap-2">
+                  {avatarColors.map((color) => (
+                    <button
+                      key={color.name}
+                      onClick={() => setAvatarBg(color.class)}
+                      className={`w-6 h-6 rounded-full ${color.class} border-2 ${avatarBg === color.class ? 'border-brand-dark scale-110 shadow-xs' : 'border-white'} active-scale cursor-pointer`}
+                      title={color.name}
+                    />
+                  ))}
+                </div>
+              </div>
             </div>
 
-            {/* CRED-style Savings Score Card */}
-            <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 rounded-2xl p-5 text-white shadow-md border border-slate-850 flex items-center justify-between animate-slide-up" style={{ animationDelay: '0.05s' }}>
-              <div>
-                <span className="text-[8px] font-black text-indigo-400 bg-indigo-950/60 border border-indigo-900/40 px-2 py-0.5 rounded uppercase tracking-wider">
-                  Chit Saving Score
-                </span>
-                <h4 className="text-xl font-black text-white mt-2 flex items-baseline gap-1">
-                  980 <span className="text-[10px] text-brand-success font-bold">Top Tier</span>
-                </h4>
-                <p className="text-[9.5px] text-slate-400 mt-1 max-w-[160px] leading-relaxed">Instalment contributions are cleared punctually.</p>
+            {/* Change Password Card */}
+            <form onSubmit={handleUpdatePassword} className="bg-white rounded-2xl p-5 border border-brand-border shadow-2xs space-y-4">
+              <h4 className="text-xs font-black text-brand-dark uppercase tracking-wider flex items-center gap-1.5 border-b border-brand-border/60 pb-2.5">
+                <FiLock className="text-brand-blue" />
+                <span>Change Password</span>
+              </h4>
+
+              {passwordStatus && (
+                <div className={`p-3 rounded-xl text-xs font-bold ${passwordStatus.startsWith('success') ? 'bg-green-50 border border-green-150 text-brand-success' : 'bg-red-50 border border-red-150 text-brand-danger'}`}>
+                  {passwordStatus.split(':')[1]}
+                </div>
+              )}
+
+              <div className="space-y-3 text-xs">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-brand-gray uppercase tracking-wider">Current Password</label>
+                  <input
+                    type="password"
+                    value={oldPassword}
+                    onChange={(e) => setOldPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full px-3 py-2.5 bg-brand-bg border border-brand-border rounded-xl font-bold text-brand-dark outline-none focus:border-brand-blue"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-brand-gray uppercase tracking-wider">New Password</label>
+                  <input
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full px-3 py-2.5 bg-brand-bg border border-brand-border rounded-xl font-bold text-brand-dark outline-none focus:border-brand-blue"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-brand-gray uppercase tracking-wider">Confirm New Password</label>
+                  <input
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full px-3 py-2.5 bg-brand-bg border border-brand-border rounded-xl font-bold text-brand-dark outline-none focus:border-brand-blue"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full py-2.5 bg-brand-blue hover:bg-brand-blue-hover text-white rounded-xl text-xs font-black active-scale transition-colors shadow-2xs cursor-pointer mt-1"
+                >
+                  Update Password
+                </button>
               </div>
-              
-              {/* Dial graphic */}
-              <div className="w-16 h-16 relative flex items-center justify-center shrink-0">
-                <svg className="w-full h-full transform -rotate-90">
-                  <circle cx="32" cy="32" r="26" className="stroke-slate-700" strokeWidth="4.5" fill="transparent" />
-                  <circle cx="32" cy="32" r="26" className="stroke-brand-success" strokeWidth="4.5" fill="transparent" strokeDasharray="163.2" strokeDashoffset="16.3" strokeLinecap="round" />
-                </svg>
-                <span className="absolute text-[10px] font-black">98%</span>
-              </div>
-            </div>
+            </form>
 
           </div>
 
-          {/* RIGHT PANEL: Preferences Options checklist & Logout buttons (Spans 2 cols) */}
+          {/* RIGHT COLUMN: Info Inputs, Notifications, WhatsApp & App Preferences */}
           <div className="lg:col-span-2 space-y-6">
             
-            <div className="bg-white rounded-2xl border border-brand-border divide-y divide-brand-border overflow-hidden shadow-xs animate-slide-up" style={{ animationDelay: '0.1s' }}>
+            {/* Profile Info Form */}
+            <form onSubmit={handleSaveProfile} className="bg-white rounded-2xl p-5 border border-brand-border shadow-2xs space-y-4">
+              <h4 className="text-xs font-black text-brand-dark uppercase tracking-wider flex items-center justify-between border-b border-brand-border/60 pb-2.5">
+                <span className="flex items-center gap-1.5">
+                  <FiUser className="text-brand-blue" />
+                  <span>Organizer Details</span>
+                </span>
+                {profileSaved && (
+                  <span className="text-[10px] font-black text-brand-success bg-green-50 px-2 py-0.5 rounded border border-green-100 flex items-center gap-0.5 uppercase">
+                    <FiCheckCircle /> Saved
+                  </span>
+                )}
+              </h4>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                {/* User Name */}
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-brand-gray uppercase tracking-wider">User Name</label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="w-full px-3.5 py-3 bg-brand-bg border border-brand-border rounded-xl font-bold text-brand-dark outline-none focus:border-brand-blue shadow-2xs"
+                    required
+                  />
+                </div>
+
+                {/* Mobile Number */}
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-brand-gray uppercase tracking-wider">Mobile Number</label>
+                  <input
+                    type="text"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
+                    className="w-full px-3.5 py-3 bg-brand-bg border border-brand-border rounded-xl font-bold text-brand-dark outline-none focus:border-brand-blue shadow-2xs"
+                    required
+                  />
+                </div>
+
+                {/* Email Address */}
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-brand-gray uppercase tracking-wider">Email Address</label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full px-3.5 py-3 bg-brand-bg border border-brand-border rounded-xl font-bold text-brand-dark outline-none focus:border-brand-blue shadow-2xs"
+                    required
+                  />
+                </div>
+
+                {/* Organizer/Savings Club Name */}
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-brand-gray uppercase tracking-wider">Organizer Name</label>
+                  <input
+                    type="text"
+                    value={organizerName}
+                    onChange={(e) => setOrganizerName(e.target.value)}
+                    className="w-full px-3.5 py-3 bg-brand-bg border border-brand-border rounded-xl font-bold text-brand-dark outline-none focus:border-brand-blue shadow-2xs"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="pt-2 flex justify-end">
+                <button
+                  type="submit"
+                  className="px-6 py-3 bg-brand-blue hover:bg-brand-blue-hover text-white rounded-xl text-xs font-black shadow-md active-scale transition-colors cursor-pointer"
+                >
+                  Save Personal Info
+                </button>
+              </div>
+            </form>
+
+            {/* Switch Toggles & Settings Block */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               
-              {/* Bank Linkages summary */}
-              <div className="p-4 flex items-center justify-between hover:bg-slate-50 transition-colors cursor-pointer active:bg-slate-100">
-                <div className="flex items-center gap-3.5">
-                  <div className="w-9.5 h-9.5 rounded-xl bg-blue-50 text-brand-blue flex items-center justify-center shrink-0 border border-blue-100">
-                    <FiCreditCard className="w-5 h-5" />
+              {/* Notification Settings */}
+              <div className="bg-white rounded-2xl p-5 border border-brand-border shadow-2xs space-y-4">
+                <h4 className="text-xs font-black text-brand-dark uppercase tracking-wider flex items-center gap-1.5 border-b border-brand-border/60 pb-2.5">
+                  <FiBell className="text-brand-blue" />
+                  <span>Notification Settings</span>
+                </h4>
+                <div className="space-y-3.5 text-xs text-brand-dark">
+                  
+                  {/* Email Alerts */}
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="font-bold block">Email Alerts</span>
+                      <span className="text-[9.5px] text-brand-gray block font-medium">Monthly collection summaries</span>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer select-none">
+                      <input 
+                        type="checkbox" 
+                        checked={emailAlerts} 
+                        onChange={() => setEmailAlerts(!emailAlerts)}
+                        className="sr-only peer" 
+                      />
+                      <div className="w-9 h-5 bg-slate-200 peer-focus:outline-hidden rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-350 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-success"></div>
+                    </label>
                   </div>
-                  <div>
-                    <span className="text-xs font-bold text-brand-dark block">Linked Bank Accounts</span>
-                    <span className="text-[10px] text-brand-gray font-semibold">State Bank of India •••• 3489</span>
+
+                  {/* SMS Reminders */}
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="font-bold block">SMS Reminders</span>
+                      <span className="text-[9.5px] text-brand-gray block font-medium">Auto SMS dispatch to pending members</span>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer select-none">
+                      <input 
+                        type="checkbox" 
+                        checked={smsAlerts} 
+                        onChange={() => setSmsAlerts(!smsAlerts)}
+                        className="sr-only peer" 
+                      />
+                      <div className="w-9 h-5 bg-slate-200 peer-focus:outline-hidden rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-350 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-success"></div>
+                    </label>
                   </div>
+
+                  {/* Push Notifications */}
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="font-bold block">Push Notifications</span>
+                      <span className="text-[9.5px] text-brand-gray block font-medium">Browser alerts for critical updates</span>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer select-none">
+                      <input 
+                        type="checkbox" 
+                        checked={pushNotifications} 
+                        onChange={() => setPushNotifications(!pushNotifications)}
+                        className="sr-only peer" 
+                      />
+                      <div className="w-9 h-5 bg-slate-200 peer-focus:outline-hidden rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-350 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-success"></div>
+                    </label>
+                  </div>
+
                 </div>
-                <FiChevronRight className="text-brand-gray w-5 h-5" />
               </div>
 
-              {/* Language switcher trigger */}
-              <div 
-                onClick={() => setShowLanguageModal(true)}
-                className="p-4 flex items-center justify-between hover:bg-slate-50 transition-colors cursor-pointer active:bg-slate-100"
-              >
-                <div className="flex items-center gap-3.5">
-                  <div className="w-9.5 h-9.5 rounded-xl bg-green-50 text-brand-success flex items-center justify-center shrink-0 border border-green-100">
-                    <FiGlobe className="w-5 h-5" />
+              {/* WhatsApp Integration Settings */}
+              <div className="bg-white rounded-2xl p-5 border border-brand-border shadow-2xs space-y-4">
+                <h4 className="text-xs font-black text-brand-dark uppercase tracking-wider flex items-center gap-1.5 border-b border-brand-border/60 pb-2.5">
+                  <FiMessageCircle className="text-brand-blue" />
+                  <span>WhatsApp Settings</span>
+                </h4>
+                <div className="space-y-3.5 text-xs text-brand-dark">
+                  
+                  {/* Auto-Receipts */}
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="font-bold block">Auto-Receipt Prompts</span>
+                      <span className="text-[9.5px] text-brand-gray block font-medium">Open WhatsApp redirect after saving</span>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer select-none">
+                      <input 
+                        type="checkbox" 
+                        checked={autoReceipts} 
+                        onChange={() => setAutoReceipts(!autoReceipts)}
+                        className="sr-only peer" 
+                      />
+                      <div className="w-9 h-5 bg-slate-200 peer-focus:outline-hidden rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-350 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-success"></div>
+                    </label>
                   </div>
-                  <div>
-                    <span className="text-xs font-bold text-brand-dark block">Preferred Language</span>
-                    <span className="text-[10px] text-brand-gray font-semibold">Current: {lang}</span>
-                  </div>
-                </div>
-                <FiChevronRight className="text-brand-gray w-5 h-5" />
-              </div>
 
-              {/* Security trust badge info */}
-              <div className="p-4 flex items-center justify-between hover:bg-slate-50 transition-colors cursor-pointer active:bg-slate-100">
-                <div className="flex items-center gap-3.5">
-                  <div className="w-9.5 h-9.5 rounded-xl bg-indigo-50 text-brand-blue flex items-center justify-center shrink-0 border border-indigo-100">
-                    <FiShield className="w-5 h-5" />
+                  {/* Payment Reminders */}
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="font-bold block">WhatsApp Reminders</span>
+                      <span className="text-[9.5px] text-brand-gray block font-medium">Direct WhatsApp ping templates for dues</span>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer select-none">
+                      <input 
+                        type="checkbox" 
+                        checked={paymentReminders} 
+                        onChange={() => setPaymentReminders(!paymentReminders)}
+                        className="sr-only peer" 
+                      />
+                      <div className="w-9 h-5 bg-slate-200 peer-focus:outline-hidden rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-350 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-success"></div>
+                    </label>
                   </div>
-                  <div>
-                    <span className="text-xs font-bold text-brand-dark block">Trust & Verification</span>
-                    <span className="text-[10px] text-brand-gray font-semibold">100% Secure Government Approved</span>
-                  </div>
-                </div>
-                <FiChevronRight className="text-brand-gray w-5 h-5" />
-              </div>
 
-              {/* Customer support desk */}
-              <div className="p-4 flex items-center justify-between hover:bg-slate-50 transition-colors cursor-pointer active:bg-slate-100">
-                <div className="flex items-center gap-3.5">
-                  <div className="w-9.5 h-9.5 rounded-xl bg-amber-50 text-amber-500 flex items-center justify-center shrink-0 border border-amber-100">
-                    <FiInfo className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <span className="text-xs font-bold text-brand-dark block">Help & Support Desk</span>
-                    <span className="text-[10px] text-brand-gray font-semibold">Get assistance in local languages 24x7</span>
-                  </div>
                 </div>
-                <FiChevronRight className="text-brand-gray w-5 h-5" />
               </div>
 
             </div>
 
-            {/* Logout button */}
+            {/* App Preferences */}
+            <div className="bg-white rounded-2xl p-5 border border-brand-border shadow-2xs space-y-4">
+              <h4 className="text-xs font-black text-brand-dark uppercase tracking-wider flex items-center gap-1.5 border-b border-brand-border/60 pb-2.5">
+                <FiGlobe className="text-brand-blue" />
+                <span>App Preferences</span>
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs text-brand-dark">
+                
+                {/* Language Selection */}
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-brand-gray uppercase tracking-wider">App Language</label>
+                  <select
+                    value={language}
+                    onChange={(e) => setLanguage(e.target.value)}
+                    className="w-full px-3 py-2 bg-brand-bg border border-brand-border rounded-xl font-bold outline-none focus:border-brand-blue"
+                  >
+                    <option value="English">English</option>
+                    <option value="Hindi">हिंदी (Hindi)</option>
+                    <option value="Tamil">தமிழ் (Tamil)</option>
+                    <option value="Telugu">తెలుగు (Telugu)</option>
+                    <option value="Malayalam">മലയാളം (Malayalam)</option>
+                  </select>
+                </div>
+
+                {/* Theme Selector */}
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-brand-gray uppercase tracking-wider">Display Theme</label>
+                  <select
+                    value={theme}
+                    onChange={(e) => setTheme(e.target.value)}
+                    className="w-full px-3 py-2 bg-brand-bg border border-brand-border rounded-xl font-bold outline-none focus:border-brand-blue"
+                  >
+                    <option value="Light">Light Mode</option>
+                    <option value="Dark">Dark Mode</option>
+                    <option value="System">System Default</option>
+                  </select>
+                </div>
+
+                {/* Currency Symbol Selector */}
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-brand-gray uppercase tracking-wider">Currency Unit</label>
+                  <select
+                    value={currency}
+                    onChange={(e) => setCurrency(e.target.value)}
+                    className="w-full px-3 py-2 bg-brand-bg border border-brand-border rounded-xl font-bold outline-none focus:border-brand-blue"
+                  >
+                    <option value="₹ (INR)">₹ (INR)</option>
+                    <option value="$ (USD)">$ (USD)</option>
+                    <option value="£ (GBP)">£ (GBP)</option>
+                  </select>
+                </div>
+
+              </div>
+            </div>
+
+            {/* Logout Row */}
             <button
               type="button"
               onClick={handleLogoutClick}
@@ -173,41 +469,6 @@ export default function Profile() {
         </div>
 
       </div>
-
-      {/* Language selection bottom sheet modal */}
-      {showLanguageModal && (
-        <div className="absolute inset-0 bg-slate-950/70 z-50 flex items-end justify-center p-0 animate-fade-in">
-          <div className="w-full max-w-lg bg-white rounded-t-[32px] p-6 space-y-4 animate-slide-up shadow-2xl">
-            <div className="flex items-center justify-between border-b border-brand-border pb-3.5">
-              <h3 className="font-extrabold text-sm text-brand-dark">Select Language</h3>
-              <button 
-                onClick={() => setShowLanguageModal(false)}
-                className="text-xs font-bold text-brand-gray hover:text-brand-dark cursor-pointer"
-              >
-                Close
-              </button>
-            </div>
-            
-            <div className="space-y-1">
-              {languages.map(language => (
-                <button
-                  key={language}
-                  onClick={() => handleSelectLanguage(language)}
-                  className={`w-full text-left p-3.5 rounded-xl font-bold text-xs flex items-center justify-between transition-colors cursor-pointer ${
-                    language.includes(lang) 
-                      ? 'bg-blue-50 text-brand-blue' 
-                      : 'hover:bg-slate-50 text-brand-dark'
-                  }`}
-                >
-                  <span>{language}</span>
-                  {language.includes(lang) && <div className="w-2.5 h-2.5 bg-brand-blue rounded-full"></div>}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
     </div>
   );
 }

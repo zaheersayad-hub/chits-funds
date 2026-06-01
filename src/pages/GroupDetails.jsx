@@ -228,6 +228,39 @@ export default function GroupDetails() {
           </div>
         </div>
 
+        {/* Selected Month Summary Stats Widget */}
+        <div className="bg-white rounded-2xl p-5 border border-brand-border shadow-2xs grid grid-cols-2 sm:grid-cols-4 gap-4 animate-scale-in">
+          <div>
+            <span className="text-[9px] text-brand-gray font-bold uppercase tracking-wider block">Cycle Period</span>
+            <span className="text-base font-black text-brand-dark block mt-1">Month {selectedMonth}</span>
+          </div>
+          <div className="border-l border-brand-border/60 pl-4">
+            <span className="text-[9px] text-brand-gray font-bold uppercase tracking-wider block">Winner</span>
+            <span className="text-xs font-black text-brand-blue block mt-1 truncate">
+              {monthWinner ? monthWinner.winnerName : 'None'}
+            </span>
+          </div>
+          <div className="border-l border-brand-border/60 pl-4">
+            <span className="text-[9px] text-brand-gray font-bold uppercase tracking-wider block">Winner Status</span>
+            <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded border inline-block mt-1 ${
+              monthWinner 
+                ? 'bg-green-50 text-brand-success border-green-150' 
+                : 'bg-amber-50 text-amber-500 border-amber-150'
+            }`}>
+              {monthWinner ? 'Declared' : 'Pending'}
+            </span>
+          </div>
+          <div className="border-l border-brand-border/60 pl-4">
+            <span className="text-[9px] text-brand-gray font-bold uppercase tracking-wider block">Collection Status</span>
+            <span className="text-xs font-black text-brand-dark block mt-1">
+              {Math.round((paidMembers.length / group.totalMembers) * 100)}% Collected
+            </span>
+            <span className="text-[9px] text-brand-gray font-bold block mt-0.5">
+              {pendingMembers.length} pending {pendingMembers.length === 1 ? 'member' : 'members'}
+            </span>
+          </div>
+        </div>
+
         {/* Selected Month Status Overview */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
           

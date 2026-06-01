@@ -22,20 +22,22 @@ export default function Payments() {
 
   const initialGroupId = use_location.state?.groupId || '';
   const initialMemberId = use_location.state?.memberId || '';
+  const initialMonth = use_location.state?.month ? Number(use_location.state.month) : 0;
 
   const [selectedGroupId, setSelectedGroupId] = useState(initialGroupId);
   const [selectedMemberId, setSelectedMemberId] = useState(initialMemberId);
+  const [selectedMonth, setSelectedMonth] = useState(initialMonth);
   
   const activeGroup = groups.find(g => g.id === selectedGroupId);
   const membersList = activeGroup ? activeGroup.members : [];
 
-  // Filter pending members for the current active month of the group
+  // Filter pending members for the chosen month of the group
   const pendingMembers = activeGroup 
     ? activeGroup.members.filter(m => {
         const hasPaid = payments.some(p => 
           p.groupId === activeGroup.id && 
           p.memberId === m.id && 
-          Number(p.month) === Number(activeGroup.currentMonth)
+          Number(p.month) === Number(selectedMonth || activeGroup.currentMonth)
         );
         return !hasPaid;
       })
@@ -58,21 +60,36 @@ export default function Payments() {
     if (initialMemberId) {
       setSelectedMemberId(initialMemberId);
     }
-  }, [initialGroupId, initialMemberId]);
+    if (initialMonth) {
+      setSelectedMonth(initialMonth);
+    }
+  }, [initialGroupId, initialMemberId, initialMonth]);
 
   // Set default amount when group is selected
   useEffect(() => {
     if (activeGroup) {
       setAmountPaid(activeGroup.monthlyAmount.toString());
-      // Pre-select first pending member if none selected
-      if (!selectedMemberId && pendingMembers.length > 0) {
-        setSelectedMemberId(pendingMembers[0].id);
+      if (!selectedMonth || selectedMonth > activeGroup.members.length) {
+        setSelectedMonth(activeGroup.currentMonth);
       }
     } else {
       setAmountPaid('');
       setSelectedMemberId('');
+      setSelectedMonth(0);
     }
   }, [selectedGroupId, activeGroup]);
+
+  // Auto-select first pending member when target month changes
+  useEffect(() => {
+    if (activeGroup && selectedMonth) {
+      const isMemberPending = pendingMembers.some(m => m.id === selectedMemberId);
+      if (!isMemberPending && pendingMembers.length > 0) {
+        setSelectedMemberId(pendingMembers[0].id);
+      } else if (pendingMembers.length === 0) {
+        setSelectedMemberId('');
+      }
+    }
+  }, [selectedMonth, selectedGroupId, pendingMembers.length]);
 
   const handleSavePayment = (e) => {
     e.preventDefault();
@@ -95,7 +112,7 @@ export default function Payments() {
       const receipt = recordPayment(
         selectedGroupId,
         selectedMemberId,
-        activeGroup.currentMonth,
+        selectedMonth,
         Number(amountPaid),
         paymentMode,
         paymentDate,
@@ -171,10 +188,27 @@ export default function Payments() {
               </select>
             </div>
 
+            {/* Select Target Month */}
+            {selectedGroupId && activeGroup && (
+              <div className="space-y-1 animate-fade-in">
+                <label className="text-[10px] font-bold text-brand-gray uppercase tracking-wider">Chit Cycle Month</label>
+                <select
+                  value={selectedMonth}
+                  onChange={(e) => setSelectedMonth(Number(e.target.value))}
+                  className="w-full px-4 py-3 bg-brand-bg border border-brand-border rounded-xl font-bold text-xs text-brand-dark outline-none focus:border-brand-blue"
+                  required
+                >
+                  {Array.from({ length: activeGroup.members.length }, (_, i) => i + 1).map(m => (
+                    <option key={m} value={m}>Month {m} {Number(activeGroup.currentMonth) === m ? '(Active)' : ''}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+
             {/* Select Member */}
             {selectedGroupId && (
               <div className="space-y-1 animate-fade-in">
-                <label className="text-[10px] font-bold text-brand-gray uppercase tracking-wider">Pending Member (For Month {activeGroup.currentMonth})</label>
+                <label className="text-[10px] font-bold text-brand-gray uppercase tracking-wider">Pending Member (For Month {selectedMonth})</label>
                 {pendingMembers.length > 0 ? (
                   <select
                     value={selectedMemberId}
@@ -190,7 +224,7 @@ export default function Payments() {
                 ) : (
                   <div className="p-4 bg-green-50 border border-green-200 text-brand-success text-xs font-bold rounded-xl flex items-center gap-2">
                     <FiInfo className="w-5 h-5 shrink-0" />
-                    <span>All members have paid for Month {activeGroup.currentMonth}!</span>
+                    <span>All members have paid for Month {selectedMonth}!</span>
                   </div>
                 )}
               </div>
@@ -321,7 +355,7 @@ export default function Payments() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-brand-gray font-bold">Cycle Month:</span>
-                    <span className="font-extrabold">Month {activeGroup ? activeGroup.currentMonth : '-'}</span>
+                    <span className="font-extrabold">Month {selectedMonth || '-'}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-brand-gray font-bold">Payment Mode:</span>

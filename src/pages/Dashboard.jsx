@@ -30,13 +30,22 @@ export default function Dashboard() {
             <p className="text-[10px] text-brand-gray font-bold uppercase tracking-wider">Chit Collection Register</p>
             <h2 className="text-xl font-black text-brand-dark tracking-tight">Hello, {user.name} 👋</h2>
           </div>
-          <button 
-            onClick={() => navigate('/create-group')}
-            className="flex items-center gap-1.5 px-4 py-2.5 bg-brand-blue text-white font-bold text-xs rounded-xl shadow-md active-scale transition-colors cursor-pointer"
-          >
-            <FiPlus className="w-4 h-4 stroke-[3]" />
-            <span>New Group</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => navigate('/create-group')}
+              className="flex items-center gap-1.5 px-3.5 py-2.5 bg-brand-blue text-white font-bold text-xs rounded-xl shadow-md active-scale transition-colors cursor-pointer"
+            >
+              <FiPlus className="w-4 h-4 stroke-[3]" />
+              <span className="hidden sm:inline">New Group</span>
+            </button>
+            <button
+              onClick={() => navigate('/profile')}
+              className="w-9.5 h-9.5 rounded-full bg-brand-blue text-white font-black text-xs flex items-center justify-center border-2 border-white shadow-sm active-scale cursor-pointer"
+              title="Profile Settings"
+            >
+              {user.avatar}
+            </button>
+          </div>
         </div>
 
         {/* Global Collections Summary Grid */}
@@ -111,27 +120,23 @@ export default function Dashboard() {
 
                   {/* Body Content */}
                   <div className="p-4 space-y-4">
-                    <div className="grid grid-cols-3 gap-2 text-xs text-brand-dark">
+                    
+                    {/* Basic Metrics Grid */}
+                    <div className="grid grid-cols-2 gap-4 text-xs text-brand-dark bg-slate-50/50 p-3 rounded-xl border border-brand-border/60">
                       <div>
-                        <span className="text-[9px] text-brand-gray font-bold uppercase block">Monthly Amount</span>
-                        <span className="font-extrabold">₹{group.monthlyAmount.toLocaleString('en-IN')}</span>
-                      </div>
-                      <div className="text-center sm:text-left">
-                        <span className="text-[9px] text-brand-gray font-bold uppercase block">Collected</span>
-                        <span className="font-extrabold text-brand-success">₹{groupMetrics.collectedAmount.toLocaleString('en-IN')}</span>
+                        <span className="text-[9px] text-brand-gray font-bold uppercase block">Collection Progress</span>
+                        <span className="font-extrabold text-brand-success">{progress}% Collected</span>
+                        <span className="text-[9px] text-brand-gray block mt-0.5">₹{groupMetrics.collectedAmount.toLocaleString('en-IN')} / ₹{groupMetrics.poolSize.toLocaleString('en-IN')}</span>
                       </div>
                       <div className="text-right">
-                        <span className="text-[9px] text-brand-gray font-bold uppercase block">Pending</span>
-                        <span className="font-extrabold text-brand-danger">₹{groupMetrics.pendingAmount.toLocaleString('en-IN')}</span>
+                        <span className="text-[9px] text-brand-gray font-bold uppercase block">Pending Members</span>
+                        <span className="font-extrabold text-brand-danger">{groupMetrics.pendingCount} Members</span>
+                        <span className="text-[9px] text-brand-gray block mt-0.5">₹{groupMetrics.pendingAmount.toLocaleString('en-IN')} pending</span>
                       </div>
                     </div>
 
                     {/* Progress Bar */}
                     <div className="space-y-1">
-                      <div className="flex justify-between text-[9px] font-bold text-brand-gray">
-                        <span>Month Collection Progress</span>
-                        <span>{progress}%</span>
-                      </div>
                       <div className="w-full h-2.5 bg-brand-bg rounded-full overflow-hidden">
                         <div 
                           className="bg-brand-success h-full transition-all duration-500" 
@@ -141,19 +146,19 @@ export default function Dashboard() {
                     </div>
 
                     {/* Winner Status Banner */}
-                    <div className="bg-slate-50 border border-brand-border/60 rounded-xl p-2.5 flex items-center justify-between text-xs text-brand-dark">
+                    <div className="bg-slate-50 border border-brand-border/60 rounded-xl p-3 flex items-center justify-between text-xs text-brand-dark">
                       <div>
-                        <span className="text-[8.5px] text-brand-gray font-bold uppercase block">Winner of Month {group.currentMonth}</span>
+                        <span className="text-[9px] text-brand-gray font-bold uppercase block">Winner Declared</span>
                         <span className="font-extrabold mt-0.5 block">
-                          {winnerRecord ? winnerRecord.winnerName : 'Pending Declaration'}
+                          {winnerRecord ? winnerRecord.winnerName : 'No winner declared yet'}
                         </span>
                       </div>
                       {winnerRecord ? (
-                        <span className="text-[9px] font-black text-brand-success bg-green-50 px-2 py-0.5 rounded border border-green-100 uppercase">
-                          Paid
+                        <span className="text-[9px] font-black text-brand-success bg-green-50 px-2.5 py-1 rounded-lg border border-green-150 uppercase">
+                          Declared
                         </span>
                       ) : (
-                        <span className="text-[9px] font-black text-amber-500 bg-amber-50 px-2 py-0.5 rounded border border-amber-100 uppercase animate-pulse">
+                        <span className="text-[9px] font-black text-amber-500 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-150 uppercase">
                           Pending
                         </span>
                       )}

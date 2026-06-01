@@ -61,24 +61,26 @@ export default function History() {
   // 3. Winner Report Data
   const winnerReportData = winners;
 
-  // 4. Pending Members Report calculations (for the current month of each group)
+  // 4. Pending Members Report calculations (across all active months in group cycles)
   const pendingMembersReportData = [];
   groups.forEach(group => {
-    // Find who has not paid for the active group.currentMonth
-    const currentMonthPayments = payments.filter(p => p.groupId === group.id && Number(p.month) === Number(group.currentMonth));
-    const pendingMembers = group.members.filter(m => !currentMonthPayments.some(p => p.memberId === m.id));
+    const limit = Math.min(group.members.length, group.currentMonth);
+    for (let month = 1; month <= limit; month++) {
+      const monthPayments = payments.filter(p => p.groupId === group.id && Number(p.month) === month);
+      const pendingMembers = group.members.filter(m => !monthPayments.some(p => p.memberId === m.id));
 
-    pendingMembers.forEach(m => {
-      pendingMembersReportData.push({
-        groupId: group.id,
-        groupName: group.name,
-        month: group.currentMonth,
-        memberName: m.name,
-        phone: m.phone,
-        address: m.address || 'Local area',
-        dues: group.monthlyAmount
+      pendingMembers.forEach(m => {
+        pendingMembersReportData.push({
+          groupId: group.id,
+          groupName: group.name,
+          month: month,
+          memberName: m.name,
+          phone: m.phone,
+          address: m.address || 'Local area',
+          dues: group.monthlyAmount
+        });
       });
-    });
+    }
   });
 
   // CSV Export Utility
