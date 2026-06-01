@@ -167,64 +167,141 @@ export default function Payments() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
           
           {/* LEFT: PAYMENT FORM */}
-          <form onSubmit={handleSavePayment} className="bg-white rounded-2xl p-5 border border-brand-border shadow-xs space-y-5">
-            <h3 className="text-xs font-bold text-brand-dark uppercase tracking-wider border-b border-brand-border/60 pb-2.5">
-              Payment Entry Form
+          <form onSubmit={handleSavePayment} className="bg-white rounded-2xl p-5 border border-brand-border shadow-xs space-y-6">
+            <h3 className="text-xs font-black text-brand-dark uppercase tracking-wider border-b border-brand-border/60 pb-2.5">
+              Record Member Contribution
             </h3>
 
-            {/* Select Group */}
-            <div className="space-y-1">
-              <label className="text-[10px] font-bold text-brand-gray uppercase tracking-wider">Chit Group</label>
-              <select
-                value={selectedGroupId}
-                onChange={(e) => setSelectedGroupId(e.target.value)}
-                className="w-full px-4 py-3 bg-brand-bg border border-brand-border rounded-xl font-bold text-xs text-brand-dark outline-none focus:border-brand-blue"
-                required
-              >
-                <option value="">-- Choose Chit Group --</option>
-                {groups.map(g => (
-                  <option key={g.id} value={g.id}>{g.name} (₹{g.monthlyAmount.toLocaleString('en-IN')}/mo)</option>
-                ))}
-              </select>
+            {/* Select Group (Redesigned custom cards) */}
+            <div className="space-y-2.5">
+              <label className="text-[10px] font-black text-brand-gray uppercase tracking-wider block">Select Chit Group</label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                {groups.map(g => {
+                  const isSelected = selectedGroupId === g.id;
+                  return (
+                    <button
+                      key={g.id}
+                      type="button"
+                      onClick={() => setSelectedGroupId(g.id)}
+                      className={`text-left p-4 rounded-2xl border transition-all duration-200 cursor-pointer flex flex-col justify-between relative overflow-hidden active-scale ${
+                        isSelected 
+                          ? 'border-brand-blue bg-blue-50/20 shadow-md ring-2 ring-brand-blue/30 scale-[1.01]' 
+                          : 'border-brand-border bg-white hover:bg-slate-50 shadow-2xs'
+                      }`}
+                    >
+                      {/* Gradient Accent Bar */}
+                      <div className={`absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r ${g.gradient}`} />
+                      
+                      <div className="flex items-center gap-3 mt-1.5">
+                        <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${g.gradient} text-white flex items-center justify-center font-extrabold text-sm shadow-sm shrink-0`}>
+                          {g.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
+                        </div>
+                        <div className="truncate">
+                          <h4 className="font-extrabold text-brand-dark text-xs truncate leading-tight">{g.name}</h4>
+                          <span className="text-[9.5px] text-brand-gray font-bold block mt-0.5">
+                            ₹{g.monthlyAmount.toLocaleString('en-IN')} • {g.totalMembers} Members
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Selection Tick Overlay */}
+                      {isSelected && (
+                        <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-brand-blue text-white flex items-center justify-center shadow-xs animate-scale-in">
+                          <FiCheck className="w-3.5 h-3.5 stroke-[3]" />
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
-            {/* Select Target Month */}
+            {/* Select Target Month (Redesigned pills) */}
             {selectedGroupId && activeGroup && (
-              <div className="space-y-1 animate-fade-in">
-                <label className="text-[10px] font-bold text-brand-gray uppercase tracking-wider">Chit Cycle Month</label>
-                <select
-                  value={selectedMonth}
-                  onChange={(e) => setSelectedMonth(Number(e.target.value))}
-                  className="w-full px-4 py-3 bg-brand-bg border border-brand-border rounded-xl font-bold text-xs text-brand-dark outline-none focus:border-brand-blue"
-                  required
-                >
-                  {Array.from({ length: activeGroup.members.length }, (_, i) => i + 1).map(m => (
-                    <option key={m} value={m}>Month {m} {Number(activeGroup.currentMonth) === m ? '(Active)' : ''}</option>
-                  ))}
-                </select>
+              <div className="space-y-2.5 animate-fade-in">
+                <label className="text-[10px] font-black text-brand-gray uppercase tracking-wider block">Target Chit Month</label>
+                <div className="flex gap-2 overflow-x-auto pb-1.5 no-scrollbar">
+                  {Array.from({ length: activeGroup.members.length }, (_, i) => i + 1).map(m => {
+                    const isSelected = selectedMonth === m;
+                    const isActive = Number(activeGroup.currentMonth) === m;
+                    
+                    return (
+                      <button
+                        key={m}
+                        type="button"
+                        onClick={() => setSelectedMonth(m)}
+                        className={`px-4.5 py-2.5 rounded-xl border text-xs font-black shrink-0 transition-all cursor-pointer active-scale flex items-center gap-1.5 ${
+                          isSelected
+                            ? 'bg-brand-blue text-white border-brand-blue shadow-xs'
+                            : 'bg-slate-50 text-brand-dark border-brand-border hover:bg-slate-100'
+                        }`}
+                      >
+                        <span>Month {m}</span>
+                        {isActive && (
+                          <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-md uppercase tracking-wider leading-none ${
+                            isSelected ? 'bg-white/25 text-white' : 'bg-brand-blue/10 text-brand-blue'
+                          }`}>
+                            Active
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             )}
 
-            {/* Select Member */}
+            {/* Select Member (Redesigned avatar cards list) */}
             {selectedGroupId && (
-              <div className="space-y-1 animate-fade-in">
-                <label className="text-[10px] font-bold text-brand-gray uppercase tracking-wider">Pending Member (For Month {selectedMonth})</label>
+              <div className="space-y-2.5 animate-fade-in">
+                <label className="text-[10px] font-black text-brand-gray uppercase tracking-wider block">
+                  Select Pending Member (For Month {selectedMonth})
+                </label>
                 {pendingMembers.length > 0 ? (
-                  <select
-                    value={selectedMemberId}
-                    onChange={(e) => setSelectedMemberId(e.target.value)}
-                    className="w-full px-4 py-3 bg-brand-bg border border-brand-border rounded-xl font-bold text-xs text-brand-dark outline-none focus:border-brand-blue"
-                    required
-                  >
-                    <option value="">-- Select Member --</option>
-                    {pendingMembers.map(m => (
-                      <option key={m.id} value={m.id}>{m.name} (+91 {m.phone})</option>
-                    ))}
-                  </select>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-[220px] overflow-y-auto pr-1 no-scrollbar pt-0.5">
+                    {pendingMembers.map(m => {
+                      const isSelected = selectedMemberId === m.id;
+                      
+                      return (
+                        <button
+                          key={m.id}
+                          type="button"
+                          onClick={() => setSelectedMemberId(m.id)}
+                          className={`text-left p-3.5 rounded-xl border transition-all duration-155 cursor-pointer flex items-center justify-between active-scale relative ${
+                            isSelected
+                              ? 'border-brand-blue bg-blue-50/40 ring-1 ring-brand-blue/20 shadow-xs'
+                              : 'border-brand-border bg-white hover:bg-slate-50'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <div className={`w-9.5 h-9.5 rounded-full text-brand-blue bg-blue-50 font-black text-xs flex items-center justify-center shrink-0 border ${
+                              isSelected ? 'border-brand-blue' : 'border-brand-border'
+                            }`}>
+                              {m.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
+                            </div>
+                            <div className="truncate">
+                              <span className="font-extrabold text-brand-dark text-xs block leading-tight truncate">{m.name}</span>
+                              <span className="text-[9.5px] text-brand-gray font-semibold block mt-0.5 truncate">+91 {m.phone}</span>
+                            </div>
+                          </div>
+                          
+                          {/* Selected Tick Indicator */}
+                          {isSelected && (
+                            <div className="w-4 h-4 rounded-full bg-brand-blue text-white flex items-center justify-center shrink-0 animate-scale-in">
+                              <FiCheck className="w-3 h-3 stroke-[3]" />
+                            </div>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
                 ) : (
-                  <div className="p-4 bg-green-50 border border-green-200 text-brand-success text-xs font-bold rounded-xl flex items-center gap-2">
-                    <FiInfo className="w-5 h-5 shrink-0" />
-                    <span>All members have paid for Month {selectedMonth}!</span>
+                  <div className="p-5 bg-green-50 border border-green-150 text-brand-success text-xs font-bold rounded-2xl flex flex-col items-center justify-center text-center gap-2 py-6 animate-scale-in">
+                    <FiCheckCircle className="w-8 h-8 text-brand-success" />
+                    <div>
+                      <h4 className="font-black text-sm text-brand-dark">Month Completed!</h4>
+                      <p className="text-[10px] text-brand-gray font-semibold mt-1">All members have contributed for Month {selectedMonth}.</p>
+                    </div>
                   </div>
                 )}
               </div>
@@ -232,12 +309,12 @@ export default function Payments() {
 
             {/* Amount, Date, Mode inputs */}
             {selectedGroupId && selectedMemberId && (
-              <div className="space-y-4 animate-fade-in">
+              <div className="space-y-4 animate-fade-in border-t border-brand-border/60 pt-4">
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Amount Paid */}
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-brand-gray uppercase tracking-wider">Amount Paid (₹)</label>
+                    <label className="text-[10px] font-black text-brand-gray uppercase tracking-wider">Amount Paid (₹)</label>
                     <div className="relative flex items-center">
                       <span className="absolute left-3.5 text-brand-dark font-black text-xs">₹</span>
                       <input
@@ -252,7 +329,7 @@ export default function Payments() {
 
                   {/* Payment Date */}
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-brand-gray uppercase tracking-wider">Payment Date</label>
+                    <label className="text-[10px] font-black text-brand-gray uppercase tracking-wider">Payment Date</label>
                     <div className="relative flex items-center">
                       <FiCalendar className="absolute left-3.5 text-brand-gray w-4 h-4" />
                       <input
@@ -267,23 +344,32 @@ export default function Payments() {
                 </div>
 
                 {/* Payment Mode */}
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-brand-gray uppercase tracking-wider block">Payment Mode</label>
+                <div className="space-y-2.5">
+                  <label className="text-[10px] font-black text-brand-gray uppercase tracking-wider block">Payment Mode</label>
                   <div className="grid grid-cols-3 gap-2">
-                    {['UPI', 'Cash', 'Bank Transfer'].map(mode => {
-                      const isSelected = paymentMode === mode;
+                    {[
+                      { mode: 'UPI', label: 'UPI / GPay', desc: 'Instant transfer' },
+                      { mode: 'Cash', label: 'Cash', desc: 'Hand to hand' },
+                      { mode: 'Bank Transfer', label: 'Bank IMPS', desc: 'Direct ledger' }
+                    ].map(item => {
+                      const isSelected = paymentMode === item.mode;
                       return (
                         <button
-                          key={mode}
+                          key={item.mode}
                           type="button"
-                          onClick={() => setPaymentMode(mode)}
-                          className={`py-3 border rounded-xl text-center font-extrabold text-xs active-scale transition-all cursor-pointer ${
+                          onClick={() => setPaymentMode(item.mode)}
+                          className={`py-3 px-1 border rounded-xl text-center active-scale transition-all cursor-pointer flex flex-col items-center justify-center gap-0.5 ${
                             isSelected 
-                              ? 'bg-brand-blue text-white border-brand-blue shadow-2xs' 
-                              : 'bg-white text-brand-dark border-brand-border hover:bg-slate-50'
+                              ? 'bg-brand-blue text-white border-brand-blue shadow-xs font-black' 
+                              : 'bg-slate-50 text-brand-dark border-brand-border hover:bg-slate-100 font-bold'
                           }`}
                         >
-                          {mode}
+                          <span className="text-xs block leading-tight">{item.label}</span>
+                          <span className={`text-[8.5px] block leading-none font-semibold ${
+                            isSelected ? 'text-white/80' : 'text-brand-gray'
+                          }`}>
+                            {item.desc}
+                          </span>
                         </button>
                       );
                     })}
@@ -292,7 +378,7 @@ export default function Payments() {
 
                 {/* Transaction Reference Number (Optional) */}
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-brand-gray uppercase tracking-wider block">Transaction Reference Number (Optional)</label>
+                  <label className="text-[10px] font-black text-brand-gray uppercase tracking-wider block">Transaction Reference Number (Optional)</label>
                   <input
                     type="text"
                     value={transactionRef}
@@ -307,7 +393,7 @@ export default function Payments() {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full py-4 bg-brand-blue hover:bg-brand-blue-hover text-white rounded-xl font-black text-xs shadow-md active-scale transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                    className="w-full py-4 bg-brand-blue hover:bg-brand-blue-hover text-white rounded-xl font-black text-xs shadow-md active-scale transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 mt-2"
                   >
                     {isSubmitting ? (
                       <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>

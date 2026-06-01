@@ -1,10 +1,10 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChitContext } from '../context/ChitContext';
 import { 
   FiArrowLeft, FiLogOut, FiGlobe, FiShield, FiUser, 
   FiInfo, FiChevronRight, FiCreditCard, FiLock, FiBell, 
-  FiMessageCircle, FiCamera, FiCheckCircle 
+  FiMessageCircle, FiCamera, FiCheckCircle, FiFileText 
 } from 'react-icons/fi';
 
 export default function Profile() {
@@ -45,6 +45,34 @@ export default function Profile() {
   const [currency, setCurrency] = useState('₹ (INR)');
 
   const [profileSaved, setProfileSaved] = useState(false);
+
+  // Organizer Notes States
+  const [organizerNotes, setOrganizerNotes] = useState(user.notes || '');
+  const [isSaving, setIsSaving] = useState(false);
+  const [lastSaved, setLastSaved] = useState(user.notesUpdatedAt ? new Date(user.notesUpdatedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : '');
+
+  // Debounced auto-save for Organizer Notes
+  useEffect(() => {
+    if (organizerNotes === (user.notes || '')) {
+      return;
+    }
+
+    setIsSaving(true);
+    const timer = setTimeout(() => {
+      const updatedUser = {
+        ...user,
+        notes: organizerNotes,
+        notesUpdatedAt: new Date().toISOString()
+      };
+      setUser(updatedUser);
+      setIsSaving(false);
+      
+      const timeStr = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      setLastSaved(timeStr);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [organizerNotes]);
 
   const handleLogoutClick = () => {
     logout();
@@ -397,6 +425,42 @@ export default function Profile() {
                 </div>
               </div>
 
+            </div>
+
+            {/* Organizer Notes Card */}
+            <div className="bg-white rounded-2xl p-5 border border-brand-border shadow-2xs space-y-4">
+              <div className="flex justify-between items-center border-b border-brand-border/60 pb-2.5">
+                <h4 className="text-xs font-black text-brand-dark uppercase tracking-wider flex items-center gap-1.5">
+                  <FiFileText className="text-brand-blue" />
+                  <span>My Organizer Notes & Reminders</span>
+                </h4>
+                <div className="flex items-center gap-1.5 text-[10px] font-bold">
+                  {isSaving ? (
+                    <span className="text-brand-blue animate-pulse flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 bg-brand-blue rounded-full animate-ping"></span>
+                      Saving...
+                    </span>
+                  ) : lastSaved ? (
+                    <span className="text-brand-success flex items-center gap-1">
+                      <FiCheckCircle /> Saved {lastSaved}
+                    </span>
+                  ) : (
+                    <span className="text-brand-gray">Ready</span>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-[10px] text-brand-gray font-medium leading-relaxed">
+                  Write down reminders, checklist, observations, or general guidelines. Changes are saved automatically as you type.
+                </p>
+                <textarea
+                  value={organizerNotes}
+                  onChange={(e) => setOrganizerNotes(e.target.value)}
+                  placeholder="Type personal reminders, observation logs, or collection strategies..."
+                  className="w-full h-40 px-3.5 py-3 bg-brand-bg border border-brand-border rounded-xl font-semibold text-xs text-brand-dark outline-none focus:border-brand-blue shadow-2xs resize-none"
+                />
+              </div>
             </div>
 
             {/* App Preferences */}

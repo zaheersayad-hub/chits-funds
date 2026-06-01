@@ -243,6 +243,29 @@ export const ChitProvider = ({ children }) => {
     return newWinner;
   };
 
+  const updateMemberNotes = (groupId, memberId, notes) => {
+    setGroups(prevGroups => 
+      prevGroups.map(g => {
+        if (g.id === groupId) {
+          return {
+            ...g,
+            members: g.members.map(m => {
+              if (m.id === memberId) {
+                return {
+                  ...m,
+                  notes,
+                  notesUpdatedAt: new Date().toISOString()
+                };
+              }
+              return m;
+            })
+          };
+        }
+        return g;
+      })
+    );
+  };
+
   const getMockMembersTemplates = () => MOCK_MEMBERS_TEMPLATES;
 
   return (
@@ -257,6 +280,7 @@ export const ChitProvider = ({ children }) => {
       createGroup,
       recordPayment,
       declareWinner,
+      updateMemberNotes,
       getMockMembersTemplates
     }}>
       {children}

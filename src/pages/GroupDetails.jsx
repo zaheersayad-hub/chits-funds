@@ -1,8 +1,8 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ChitContext } from '../context/ChitContext';
 import { calculateGroupMetrics } from '../utils/calcEngine';
-import { FiArrowLeft, FiCalendar, FiUsers, FiDollarSign, FiAward, FiCheckCircle, FiClock, FiPlusCircle, FiList, FiFileText, FiPrinter, FiMessageCircle, FiUser, FiMapPin, FiX } from 'react-icons/fi';
+import { FiArrowLeft, FiCalendar, FiUsers, FiDollarSign, FiAward, FiCheckCircle, FiClock, FiPlusCircle, FiList, FiFileText, FiPrinter, FiMessageCircle, FiUser, FiMapPin, FiX, FiShield } from 'react-icons/fi';
 
 // Date Formatter Helper: e.g. "01-Jun-2026"
 const formatDateNice = (dateStr) => {
@@ -19,7 +19,7 @@ const formatDateNice = (dateStr) => {
 export default function GroupDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { groups, payments, winners, declareWinner, user } = useContext(ChitContext);
+  const { groups, payments, winners, declareWinner, updateMemberNotes, user } = useContext(ChitContext);
 
   const group = groups.find(g => g.id === id);
 
@@ -39,6 +39,16 @@ export default function GroupDetails() {
 
   // Member Profile modal state
   const [selectedMemberProfile, setSelectedMemberProfile] = useState(null);
+  const [memberNotesText, setMemberNotesText] = useState('');
+  const [memberNotesSavedStatus, setMemberNotesSavedStatus] = useState('');
+
+  useEffect(() => {
+    if (selectedMemberProfile) {
+      const currentMember = group.members.find(m => m.id === selectedMemberProfile.id);
+      setMemberNotesText(currentMember?.notes || '');
+      setMemberNotesSavedStatus('');
+    }
+  }, [selectedMemberProfile, group.members]);
 
   if (!group) {
     return (
@@ -145,6 +155,9 @@ export default function GroupDetails() {
   };
 
   const profileStats = selectedMemberProfile ? getMemberProfileStats(selectedMemberProfile.id) : null;
+  const activeMemberInGroup = selectedMemberProfile 
+    ? group.members.find(m => m.id === selectedMemberProfile.id) 
+    : null;
 
   return (
     <div className="flex-1 bg-brand-bg relative overflow-x-hidden">
@@ -548,6 +561,57 @@ export default function GroupDetails() {
                   </span>
                 )}
               </div>
+
+              {/* Private Member Notes Card */}
+              {activeMemberInGroup && (
+                <div className="bg-slate-50 border border-brand-border/60 rounded-xl p-4 space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="font-bold text-brand-dark uppercase tracking-wider block text-xs flex items-center gap-1.5">
+                      <FiShield className="text-brand-blue" />
+                      <span>Private Notes (Organizer Only)</span>
+                    </span>
+                    
+                    {memberNotesSavedStatus && (
+                      <span className="text-[10px] font-black text-brand-success flex items-center gap-0.5 uppercase">
+                        <FiCheckCircle /> {memberNotesSavedStatus}
+                      </span>
+                    )}
+                  </div>
+                  
+                  <p className="text-[9.5px] text-brand-gray font-medium leading-tight">
+                    Record payment behaviors, trusted remarks, reminders, or pending dues details. This information is private to you.
+                  </p>
+
+                  <div className="space-y-2">
+                    <textarea
+                      value={memberNotesText}
+                      onChange={(e) => setMemberNotesText(e.target.value)}
+                      placeholder="e.g. Pays on time via UPI, trusted member, check for Month 2 dues..."
+                      className="w-full h-20 px-3 py-2 bg-white border border-brand-border rounded-xl font-semibold text-xs text-brand-dark outline-none focus:border-brand-blue shadow-2xs resize-none"
+                    />
+                    <div className="flex justify-between items-center text-[9px] text-brand-gray">
+                      <span>
+                        {activeMemberInGroup.notesUpdatedAt ? (
+                          `Updated: ${new Date(activeMemberInGroup.notesUpdatedAt).toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' })}`
+                        ) : (
+                          'No notes saved yet'
+                        )}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          updateMemberNotes(group.id, activeMemberInGroup.id, memberNotesText);
+                          setMemberNotesSavedStatus('Saved');
+                          setTimeout(() => setMemberNotesSavedStatus(''), 3000);
+                        }}
+                        className="px-3.5 py-1.5 bg-brand-blue hover:bg-brand-blue-hover text-white rounded-lg font-black active-scale shadow-2xs cursor-pointer text-[10px]"
+                      >
+                        Save Notes
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Payment History Register */}
               <div className="space-y-2">
