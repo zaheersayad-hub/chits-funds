@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { NavLink } from 'react-router-dom';
-import { FiHome, FiUsers, FiCreditCard, FiClock } from 'react-icons/fi';
 import { ChitContext } from '../context/ChitContext';
+import { NAVIGATION_ITEMS } from '../utils/navigationConfig';
 
 export default function BottomNav() {
   const { groups, payments } = useContext(ChitContext);
@@ -20,15 +20,18 @@ export default function BottomNav() {
     return count + (isPaid ? 0 : 1);
   }, 0);
 
-  const navItems = [
-    { to: '/dashboard', label: 'Home', icon: FiHome },
-    { to: '/groups', label: 'Groups', icon: FiUsers },
-    { to: '/payments', label: 'Payments', icon: FiCreditCard, badge: pendingCount > 0 ? pendingCount : null },
-    { to: '/history', label: 'History', icon: FiClock },
-  ];
+  const navItems = NAVIGATION_ITEMS.map(item => {
+    if (item.to === '/payments') {
+      return { ...item, badge: pendingCount > 0 ? pendingCount : null };
+    }
+    return item;
+  });
 
   return (
-    <div className="h-18 bg-white border-t border-brand-border flex items-center justify-around px-4 select-none shrink-0 z-40 shadow-lg">
+    <div 
+      className="fixed bottom-0 left-0 right-0 z-[1000] bg-white border-t border-brand-border flex items-center justify-around px-4 select-none shadow-lg pb-[env(safe-area-inset-bottom)] md:hidden"
+      style={{ height: 'calc(4.5rem + env(safe-area-inset-bottom))' }}
+    >
       {navItems.map((item) => {
         const Icon = item.icon;
         return (

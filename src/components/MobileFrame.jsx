@@ -1,8 +1,9 @@
 import React, { useContext } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { ChitContext } from '../context/ChitContext';
-import { FiHome, FiUsers, FiCreditCard, FiUser, FiLogOut, FiLayers } from 'react-icons/fi';
+import { FiLogOut, FiLayers } from 'react-icons/fi';
 import BottomNav from './BottomNav';
+import { NAVIGATION_ITEMS } from '../utils/navigationConfig';
 
 export default function MobileFrame({ children }) {
   const { user, logout, groups } = useContext(ChitContext);
@@ -28,12 +29,12 @@ export default function MobileFrame({ children }) {
     return count + (userMember?.status === 'Pending' ? 1 : 0);
   }, 0);
 
-  const sidebarItems = [
-    { to: '/dashboard', label: 'Dashboard', icon: FiHome },
-    { to: '/groups', label: 'Chit Groups', icon: FiUsers },
-    { to: '/payments', label: 'Payments Portal', icon: FiCreditCard, badge: pendingCount > 0 ? pendingCount : null },
-    { to: '/profile', label: 'Profile Settings', icon: FiUser },
-  ];
+  const sidebarItems = NAVIGATION_ITEMS.map(item => {
+    if (item.to === '/payments') {
+      return { ...item, badge: pendingCount > 0 ? pendingCount : null };
+    }
+    return item;
+  });
 
   const handleLogoutClick = () => {
     logout();
@@ -114,7 +115,7 @@ export default function MobileFrame({ children }) {
       <main className="flex-grow flex flex-col min-h-screen relative overflow-hidden">
         
         {/* Render Page View */}
-        <div className="flex-grow flex flex-col overflow-y-auto bg-brand-bg relative no-scrollbar">
+        <div className="flex-grow flex flex-col overflow-y-auto bg-brand-bg relative no-scrollbar pb-24 md:pb-6">
           {children}
         </div>
 
